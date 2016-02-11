@@ -1,6 +1,7 @@
 import com.google.api.services.drive.Drive;
 
 import java.io.File;
+import java.io.IOException;
 
 import java.util.LinkedList;
 import java.util.TreeMap;
@@ -50,7 +51,7 @@ public class IOFile {
     return fi.subFiles;
   }
 
-  public static TreeMap<IOFile, String> deep(IOFile fi, Drive service) {
+  public static TreeMap<IOFile, String> deep(IOFile fi, Drive service) throws IOException {
     // Initial list of directories to search
     File[] initial = getOriginal(fi).listFiles();
     
@@ -61,24 +62,27 @@ public class IOFile {
   }
 
   // TODO: Treeset?
-  private static TreeMap<IOFile, String> deeper(IOFile fi, int numSize, TreeMap<IOFile, String> adding, Drive service) {
+  private static TreeMap<IOFile, String> deeper(IOFile fi, int numSize, TreeMap<IOFile, String> adding, Drive service) throws IOException {
     if(numSize == 0)
       return adding;
 
     File temp = getSubFiles(fi).removeFirst();
 
     // Checks if the folder/file was in Drive folders
-    if(!DriveQuickstart.inDrive(service, getName(fi))) {
+    if(!DriveCommand.inDrive(service, getName(fi))) {
       System.out.println("Not in Drive");
       /* TODO: Add method in DriveQuickstart to
           Get "name", "parent", "mimeType" */
       //adding.put(new IOFile(nme, mimeType), parent.get(0));
     }
-    if(getDirectory(fi)) {
+    if(temp.isDirectory()) {
       File[] list = temp.listFiles();
+      System.out.println("\n" + temp.getName() + "\n");
 
-      for(File file : list)
+      for(File file : list) {
+        System.out.println(file.getName()); 
         getSubFiles(fi).addLast(file);
+      }
 
       // Keep track of how many subFolders are left
       numSize = getSubFiles(fi).size();
