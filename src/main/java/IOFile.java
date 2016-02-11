@@ -51,33 +51,52 @@ public class IOFile {
     return fi.subFiles;
   }
 
-  public static TreeMap<IOFile, String> deep(IOFile fi, Drive service) throws IOException {
+  private static String parentFolder(File file) {
+    String[] path = file.getParent().split("/");
+
+    int len = path.length;
+
+    return path[len-1];
+  }
+
+  public static TreeMap<IOFile, String> deep(IOFile fi, DriveSearch ds) throws IOException, InterruptedException {
     // Initial list of directories to search
     File[] initial = getOriginal(fi).listFiles();
     
     for(File file : initial)
       getSubFiles(fi).add(file);
 
-    return deeper(fi, getSubFiles(fi).size(), new TreeMap<IOFile, String>(), service);
+    return deeper(fi, getSubFiles(fi).size(), new TreeMap<IOFile, String>(), ds);
   }
 
   // TODO: Treeset?
-  private static TreeMap<IOFile, String> deeper(IOFile fi, int numSize, TreeMap<IOFile, String> adding, Drive service) throws IOException {
+  private static TreeMap<IOFile, String> deeper(IOFile fi, int numSize, TreeMap<IOFile, String> adding, DriveSearch ds) throws IOException, InterruptedException {
     if(numSize == 0)
       return adding;
 
     File temp = getSubFiles(fi).removeFirst();
+    numSize--;
+
+    Boolean drive = null;
+
+    try {
+      drive = ds.inDrive(temp.getName(), parentFolder(temp));
+    } catch (Exception e) {
+
+      Thread.sleep(1000);
+      drive = ds.inDrive(temp.getName(), parentFolder(temp));
+    }
 
     // Checks if the folder/file was in Drive folders
-    if(!DriveCommand.inDrive(service, getName(fi))) {
-      System.out.println("Not in Drive");
+    System.out.println("\nDrive : " + drive);
+    if(drive != null && !drive) {
+      System.out.println("Not in Drive\n");
       /* TODO: Add method in DriveQuickstart to
           Get "name", "parent", "mimeType" */
       //adding.put(new IOFile(nme, mimeType), parent.get(0));
     }
     if(temp.isDirectory()) {
       File[] list = temp.listFiles();
-      System.out.println("\n" + temp.getName() + "\n");
 
       for(File file : list) {
         System.out.println(file.getName()); 
@@ -88,6 +107,6 @@ public class IOFile {
       numSize = getSubFiles(fi).size();
     }
 
-    return deeper(fi, numSize, adding, service);
+    return deeper(fi, numSize, adding, ds);
   }
 }

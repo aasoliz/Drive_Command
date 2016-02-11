@@ -13,8 +13,6 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.*;
 import com.google.api.services.drive.Drive;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -101,62 +99,15 @@ public class DriveCommand {
               .build();
   }
 
-  public static Boolean inDrive(Drive service, String find) throws IOException {
-    FileList result = service.files().list()
-            .setQ("name='" + find + "'")
-            .setSpaces("drive")
-            .setFields("files(id, name, parents)")
-            .execute();
-
-    for(File file : result.getFiles())
-      System.out.printf("Name %s, Id %s, Parents %s\n", file.getName(), file.getId(), file.getParents());
-
-    return true;
-  }
-
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, InterruptedException {
     // Build a new authorized API client service.
     Drive service = getDriveService();
 
-    String pageToken = null;
-
-    // TODO: Save in hidden app folder, so don't have to read over and over
-    HashMap<String, String> folders = new HashMap<String, String>();
-
-    try(BufferedReader reader = new BufferedReader(new FileReader("/home/aasoliz/Documents/Other/Commands/Drive_Command/src/main/resources/FolderMapping.txt"))) {
-      String curr;
-      String[] parsed;
-
-      while((curr = reader.readLine()) != null) {
-        parsed = curr.split("\\s+");
-        folders.put(parsed[0], parsed[1]);
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    DriveSearch ds = new DriveSearch(service);
+    ds.readKnown();
 
     IOFile root = new IOFile("/home/aasoliz/Documents/Classes/spring2016");
 
-    TreeMap<IOFile, String> adding = IOFile.deep(root, service);
-
-/*
-    File[] temp = null;
-
-    for(int i = 0; i < files.length; i++) {
-      if(!folders.containsKey(files[i]))
-        // Add folders/files (Drive API)
-      else
-        temp = files[i].listFiles();
-
-      for(int j = 0; j < temp.length; j++) {
-        if(temp[j].isDirectory())
-          if(!folders.containsKey(temp[j]))
-            // ADD
-        else
-          // Check if in parent folder (Drive API)
-      }
-    }*/
-      
-
+    TreeMap<IOFile, String> adding = IOFile.deep(root, ds);
   }
 }
