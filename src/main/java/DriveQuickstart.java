@@ -14,7 +14,6 @@ import com.google.api.services.drive.model.*;
 import com.google.api.services.drive.Drive;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -102,28 +101,17 @@ public class DriveQuickstart {
               .build();
   }
 
-  // TODO: TreeSet?
-  public static TreeMap<File, String> deeper(LinkedList<File> files, HashMap<String, String> folders, TreeMap<File, String> adding) {
-    // if(!folders.containsKey(files.getFirst())) /* NEED? */
-    File temp = files.getFirst();
-    File[] list = null;
+  public static Boolean inDrive(Drive service, String find) {
+    FileList result = service.files().list()
+            .setQ("name='" + find + "'")
+            .setSpaces("drive")
+            .setFields("files(id, name, parents)")
+            .execute();
 
-    if(!inDrive())
-      adding.put(temp, getParent());
+    for(File file : result.getFiles())
+      System.out.printf("Name %s, Id %s, Parents %s\n", file.getName(), file.getId(), file.getParents());
 
-    if(temp.isDirectory()) {
-      list = temp.listFiles();
-
-      for(File file : list)
-        files.addLast(file);
-    }
-
-    // All or need to add when recursing?
-    else
-      return adding;
-
-    files.removeFirst()
-    return deeper(files, folders, adding);
+    return true;
   }
 
   public static void main(String[] args) throws IOException {
@@ -135,7 +123,7 @@ public class DriveQuickstart {
     // TODO: Save in hidden app folder, so don't have to read over and over
     HashMap<String, String> folders = new HashMap<String, String>();
 
-    try(BufferedReader reader = new BufferedReader(new FileReader("/home/aasoliz/Documents/Other/Commands/Drive_API/src/main/resources/FolderMapping.txt"))) {
+    try(BufferedReader reader = new BufferedReader(new FileReader("/home/aasoliz/Documents/Other/Commands/Drive_Command/src/main/resources/FolderMapping.txt"))) {
       String curr;
       String[] parsed;
 
@@ -147,13 +135,9 @@ public class DriveQuickstart {
       e.printStackTrace();
     }
 
-    File root = new File("/home/aasoliz/Documents/Classes/spring2016");
+    IOFile root = new IOFile("/home/aasoliz/Documents/Classes/spring2016");
 
-    // Get list of files/directories in 'root'
-    File[] initial = root.listFiles();
-
-    LinkedList<File> files = null;
-    files.addAll(initial);
+    TreeMap<IOFile, String> adding = IOFile.deep(root, service);
 
 /*
     File[] temp = null;

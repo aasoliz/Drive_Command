@@ -16,4 +16,4 @@ include 'api'
 include 'services:webservice'
 */
 
-rootProject.name = 'Drive_API'
+rootProject.name = 'Drive_Command'
