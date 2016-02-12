@@ -1,0 +1,3 @@
+application/msword,application/vnd.oasis.opendocument.text,text/html,application/rtf application/vnd.google-apps.document
+application/vnd.ms-excel,application/vnd.oasis.opendocument.spreadsheet,text/csv,text/tab-separated-values application/vnd.google-apps.spreadsheet
+application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.presentation application/vnd.google-apps.presentation

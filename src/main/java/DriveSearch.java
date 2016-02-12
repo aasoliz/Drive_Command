@@ -18,8 +18,6 @@ public class DriveSearch {
   }
 
   public static Boolean inDrive(String find, String parent) throws IOException {
-    System.out.println("find original " + find);
-
     FileList result = service.files().list()
             .setQ("name='" + find + "'")
             .setSpaces("drive")

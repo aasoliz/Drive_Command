@@ -69,7 +69,6 @@ public class IOFile {
     return deeper(fi, getSubFiles(fi).size(), new TreeMap<IOFile, String>(), ds);
   }
 
-  // TODO: Treeset?
   private static TreeMap<IOFile, String> deeper(IOFile fi, int numSize, TreeMap<IOFile, String> adding, DriveSearch ds) throws IOException, InterruptedException {
     if(numSize == 0)
       return adding;
@@ -88,20 +87,17 @@ public class IOFile {
     }
 
     // Checks if the folder/file was in Drive folders
-    System.out.println("\nDrive : " + drive);
     if(drive != null && !drive) {
-      System.out.println("Not in Drive\n");
-      /* TODO: Add method in DriveQuickstart to
-          Get "name", "parent", "mimeType" */
-      //adding.put(new IOFile(nme, mimeType), parent.get(0));
+      DriveUpload up = new DriveUpload();
+      up.types();
+
+      adding.put(new IOFile(temp.getName(), up.fileType(temp.toPath()), parentFolder(temp));
     }
     if(temp.isDirectory()) {
       File[] list = temp.listFiles();
 
-      for(File file : list) {
-        System.out.println(file.getName()); 
+      for(File file : list)
         getSubFiles(fi).addLast(file);
-      }
 
       // Keep track of how many subFolders are left
       numSize = getSubFiles(fi).size();
