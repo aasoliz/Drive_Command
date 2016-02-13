@@ -17,6 +17,8 @@ public class DriveSearch {
     service = serve;
   }
 
+ // public 
+
   public static Boolean inDrive(String find, String parent) throws IOException {
     FileList result = service.files().list()
             .setQ("name='" + find + "'")

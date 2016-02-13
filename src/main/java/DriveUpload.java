@@ -1,3 +1,8 @@
+import com.google.api.client.http.FileContent;
+
+import com.google.api.services.drive.model.*;
+import com.google.api.services.drive.Drive;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -5,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class DriveUpload {
   private static HashMap<String, String> mimeType;
@@ -42,5 +48,34 @@ public class DriveUpload {
       return ext;
 
     return test;
+  }
+
+  public static void uploadFile(IOFile file, String mimeType, Drive service) throws IOException {
+    // TODO: Check if file is folder, add to "foldermappings"
+
+    LinkedList<String> parent = new LinkedList<String>();
+    parent.add(IOFile.parentFolder(IOFile.getOriginal(file)));
+
+    Permission perm = new Permission();
+    perm.setEmailAddress("and.sol17@gmail.com");
+    perm.setRole("owner");
+    LinkedList<Permission> permis = new LinkedList<Permission>();
+    permis.add(perm);
+
+    File meta = new File();
+    meta.setName(IOFile.getNameExt(file));
+    meta.setMimeType(mimeType);
+    meta.setParents(parent);
+    meta.setWritersCanShare(true);
+    meta.setViewersCanCopyContent(true);
+    meta.setPermissions(permis);
+
+    FileContent mediaContent = new FileContent(mimeType, IOFile.getOriginal(file));
+
+    File nw = service.files().create(meta, mediaContent)
+         .setFields("id")
+         .execute();
+
+    System.out.printf("ew file created %s", nw.getId());
   }
 }

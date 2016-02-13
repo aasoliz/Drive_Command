@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
-import java.util.TreeMap;
+import java.util.Map;
 
 public class DriveCommand {
   /** Application name. */
@@ -101,6 +101,7 @@ public class DriveCommand {
 
   public static void main(String[] args) throws IOException, InterruptedException {
     // Build a new authorized API client service.
+    // TODO: Make sure to catch if not authenticated
     Drive service = getDriveService();
 
     DriveSearch ds = new DriveSearch(service);
@@ -108,6 +109,9 @@ public class DriveCommand {
 
     IOFile root = new IOFile("/home/aasoliz/Documents/Classes/spring2016");
 
-    TreeMap<IOFile, String> adding = IOFile.deep(root, ds);
+    HashMap<IOFile, String> adding = IOFile.deep(root, ds);
+
+    for(Map.Entry<IOFile, String> entry : adding.entrySet())
+      DriveUpload.uploadFile(entry.getKey(), entry.getValue(), service);
   }
 }

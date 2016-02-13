@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import java.util.LinkedList;
-import java.util.TreeMap;
+import java.util.HashMap;
 
 public class IOFile {
   private File original;
@@ -20,15 +20,11 @@ public class IOFile {
     isDirectory = original.isDirectory();
   }
 
-  public IOFile(String nme, String mimeType) {
-    original = null;
-    parents = null;
-    name = nme;
-
-    if(mimeType.equals("application/vnd.google-api.folder"))
-      isDirectory = true;
-    else
-      isDirectory = false;
+  public IOFile(File root) {
+    original = root;
+    name = original.getName();
+    parents = original.getParent();
+    isDirectory = original.isDirectory();
   }
 
   public static File getOriginal(IOFile fi) {
@@ -37,6 +33,12 @@ public class IOFile {
 
   public static String getName(IOFile fi) {
     return fi.name;
+  }
+
+  public static String getNameExt(IOFile fi) {
+    String[] path = getOriginal(fi).toPath().toString().split("/");
+
+    return path[path.length-1];
   }
 
   public static String getParents(IOFile fi) {
@@ -51,7 +53,7 @@ public class IOFile {
     return fi.subFiles;
   }
 
-  private static String parentFolder(File file) {
+  public static String parentFolder(File file) {
     String[] path = file.getParent().split("/");
 
     int len = path.length;
@@ -59,17 +61,17 @@ public class IOFile {
     return path[len-1];
   }
 
-  public static TreeMap<IOFile, String> deep(IOFile fi, DriveSearch ds) throws IOException, InterruptedException {
+  public static HashMap<IOFile, String> deep(IOFile fi, DriveSearch ds) throws IOException, InterruptedException {
     // Initial list of directories to search
     File[] initial = getOriginal(fi).listFiles();
     
     for(File file : initial)
       getSubFiles(fi).add(file);
 
-    return deeper(fi, getSubFiles(fi).size(), new TreeMap<IOFile, String>(), ds);
+    return deeper(fi, getSubFiles(fi).size(), new HashMap<IOFile, String>(), ds);
   }
 
-  private static TreeMap<IOFile, String> deeper(IOFile fi, int numSize, TreeMap<IOFile, String> adding, DriveSearch ds) throws IOException, InterruptedException {
+  private static HashMap<IOFile, String> deeper(IOFile fi, int numSize, HashMap<IOFile, String> adding, DriveSearch ds) throws IOException, InterruptedException {
     if(numSize == 0)
       return adding;
 
@@ -91,7 +93,7 @@ public class IOFile {
       DriveUpload up = new DriveUpload();
       up.types();
 
-      adding.put(new IOFile(temp.getName(), up.fileType(temp.toPath()), parentFolder(temp));
+      adding.put(new IOFile(temp), up.fileType(temp.toPath()));
     }
     if(temp.isDirectory()) {
       File[] list = temp.listFiles();
