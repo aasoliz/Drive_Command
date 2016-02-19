@@ -90,10 +90,12 @@ public class IOFile {
 
     // Checks if the folder/file was in Drive folders
     if(drive != null && !drive) {
-      DriveUpload up = new DriveUpload();
-      up.types();
+      if(temp.getName().charAt(0) != '.' && temp.getName().charAt(0) != '#') { 
+        DriveUpload up = new DriveUpload();
+        up.types();
 
-      adding.put(new IOFile(temp), up.fileType(temp.toPath()));
+        adding.put(new IOFile(temp), up.fileType(temp.toPath()));
+      }
     }
     if(temp.isDirectory()) {
       File[] list = temp.listFiles();

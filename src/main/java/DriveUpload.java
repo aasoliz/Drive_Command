@@ -52,15 +52,17 @@ public class DriveUpload {
 
   public static void uploadFile(IOFile file, String mimeType, Drive service) throws IOException {
     // TODO: Check if file is folder, add to "foldermappings"
+    // TODO: Multipart upload?
+
+    System.out.println("Files : " + IOFile.getName(file));
 
     LinkedList<String> parent = new LinkedList<String>();
-    parent.add(IOFile.parentFolder(IOFile.getOriginal(file)));
-
-    Permission perm = new Permission();
-    perm.setEmailAddress("and.sol17@gmail.com");
-    perm.setRole("owner");
-    LinkedList<Permission> permis = new LinkedList<Permission>();
-    permis.add(perm);
+    parent.add(DriveSearch.getParentId(
+      IOFile.parentFolder(
+        IOFile.getOriginal(file)
+        )
+      )
+    );
 
     File meta = new File();
     meta.setName(IOFile.getNameExt(file));
@@ -68,14 +70,20 @@ public class DriveUpload {
     meta.setParents(parent);
     meta.setWritersCanShare(true);
     meta.setViewersCanCopyContent(true);
-    meta.setPermissions(permis);
 
     FileContent mediaContent = new FileContent(mimeType, IOFile.getOriginal(file));
 
-    File nw = service.files().create(meta, mediaContent)
-         .setFields("id")
-         .execute();
+    try {
+      File nw = service.files().create(meta, mediaContent)
+           .setFields("id")
+           .execute();
+      System.out.printf("ew file created %s", nw.getId());
 
-    System.out.printf("ew file created %s", nw.getId());
+      if(mimeType.equals("application/vnd.google-apps.folder"))
+        DriveSearch.updateFolders(file);
+
+    } catch (IOException e) {
+      System.out.println("Name: " + IOFile.getName(file) + " " + e);
+    }
   }
 }

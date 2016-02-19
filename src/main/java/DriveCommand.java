@@ -48,7 +48,7 @@ public class DriveCommand {
    * at ~/.credentials/drive-java-quickstart.json
    */
   private static final List<String> SCOPES =
-    Arrays.asList(DriveScopes.DRIVE_METADATA_READONLY);
+    Arrays.asList(DriveScopes.DRIVE);
 
   static {
     try {
