@@ -18,7 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
@@ -104,14 +104,45 @@ public class DriveCommand {
     // TODO: Make sure to catch if not authenticated
     Drive service = getDriveService();
 
+    // Name given has to be unique or it could get the wrong folder
+    // Name also must be the same in both drive folder and locally
+    // Maybe add parent folder so that it can be more precise
+    // Provide whether folder provided is a top folder
+    FileList result = service.files().list()
+            .setQ("mimeType='application/vnd.google-apps.folder' and name='spring2016' and trashed=false")
+            .setSpaces("drive")
+            .setFields("files(id, name, parents)")
+            .execute();
+
+    File file = result.getFiles().get(0);
+    String topFolder = (file.getParents().get(0).split("-"))[0];
+
+    DriveDirectory dir = new DriveDirectory(file.getName(), file.getId(), true);
+
+    LinkedList<DriveDirectory> root = new LinkedList<DriveDirectory>();
+    root.add(dir);
+
     DriveSearch ds = new DriveSearch(service);
-    ds.readKnown();
+    ds.addChildren(root);
 
-    IOFile root = new IOFile("/home/aasoliz/Documents/Classes/spring2016");
+    String path = DriveDirectory.getSuperPath(ds, dir, file.getParents().get(0), topFolder);
 
-    HashMap<IOFile, String> adding = IOFile.deep(root, ds);
+    // DriveSearch ds = new DriveSearch(service);
+    // ds.readKnown();
 
-    for(Map.Entry<IOFile, String> entry : adding.entrySet())
-      DriveUpload.uploadFile(entry.getKey(), entry.getValue(), service);
+    // IOFile root = new IOFile("/home/aasoliz/Documents/Classes/spring2016");
+
+    // DriveUpload up = new DriveUpload();
+    // up.types();
+
+    // LinkedHashMap<IOFile, String> adding = IOFile.deep(root, ds, up);
+
+    // Boolean flag = true;
+    // for(Map.Entry<IOFile, String> entry : adding.entrySet())
+    //   if(flag) {
+    //     System.out.println(IOFile.getName(entry.getKey()) + " " + entry.getValue());
+    //     DriveUpload.uploadFile(entry.getKey(), entry.getValue(), service);
+    //     flag = false; 
+    //   }
   }
 }

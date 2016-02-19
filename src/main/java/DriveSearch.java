@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class DriveSearch {
   // TODO: Save in hidden app folder, so don't have to read over and over
@@ -37,6 +38,7 @@ public class DriveSearch {
     return false;
   }
 
+  // May not need anymore
   public static Boolean readKnown() {
     folders = new HashMap<String, String>();
 
@@ -63,7 +65,7 @@ public class DriveSearch {
     return folders.get(parent);
   }
 
-  public static void updateFolders(IOFile file) throws IOException {
+  public static void updateFolders(IOFile file, String id) throws IOException {
     try(BufferedWriter writer = new BufferedWriter(new FileWriter(folderOrigin, true))) {
       writer.newLine();
       
@@ -76,6 +78,42 @@ public class DriveSearch {
       );
 
       writer.close();
+    } catch (IOException e) {
+      System.out.println(e);
     }
+  }
+
+  public static LinkedList<DriveDirectory> addChildren(LinkedList<DriveDirectory> parents) throws IOException {
+    if(parents.size() == 0)
+      return parents;
+
+    DriveDirectory parent = parents.removeFirst();
+
+    FileList result = service.files().list()
+            .setQ("'" + parent.getID() + "' in parents")
+            .setSpaces("drive")
+            .setFields("files(id, name, mimeType)")
+            .execute();
+    
+    for(File file : result.getFiles()) {
+      DriveDirectory temp = null;
+      if(file.getMimeType().equals("application/vnd.google-apps.folder")) {
+        temp = new DriveDirectory(file.getName(), file.getId(), true);
+
+        DriveDirectory.addChild(parent, temp);
+        parents.addLast(temp);
+      }
+      temp = new DriveDirectory(file.getName(), file.getId(), false);
+
+      DriveDirectory.addChild(parent, temp);
+    }
+
+    return addChildren(parents);
+  }
+
+  public static File getParent(String parentID) throws IOException {
+    return service.files().get(parentID)
+            .setFields("id, name, parents")
+            .execute();
   }
 }

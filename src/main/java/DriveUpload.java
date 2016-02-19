@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import java.nio.file.Path;
 
+import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -19,15 +20,13 @@ public class DriveUpload {
 
   public static Boolean types() throws IOException {
     mimeType = new HashMap<String, String>();
-
     try(BufferedReader reader = new BufferedReader(new FileReader("/home/aasoliz/Documents/Other/Commands/Drive_Command/src/main/resources/mimeTypeMapping.txt"))) {
       String curr;
       String[] parsed;
-
       while((curr = reader.readLine()) != null) {
-        parsed = curr.split(",\\s+");
+        parsed = curr.split("[,\\s]");
 
-        for(int i = 0; i < parsed.length-2; i++)
+        for(int i = 0; i < parsed.length-1; i++)
           mimeType.put(parsed[i], parsed[parsed.length-1]);
       }
 
@@ -71,19 +70,32 @@ public class DriveUpload {
     meta.setWritersCanShare(true);
     meta.setViewersCanCopyContent(true);
 
-    FileContent mediaContent = new FileContent(mimeType, IOFile.getOriginal(file));
+    if(!mimeType.equals("application/vnd.google-apps.folder")) {
+      FileContent mediaContent = new FileContent(mimeType, IOFile.getOriginal(file));
 
-    try {
-      File nw = service.files().create(meta, mediaContent)
-           .setFields("id")
-           .execute();
-      System.out.printf("ew file created %s", nw.getId());
+      try {
+        File nw = service.files().create(meta, mediaContent)
+             .setFields("id")
+             .execute();
+        System.out.printf("ew file created %s", nw.getId());
 
-      if(mimeType.equals("application/vnd.google-apps.folder"))
-        DriveSearch.updateFolders(file);
-
-    } catch (IOException e) {
-      System.out.println("Name: " + IOFile.getName(file) + " " + e);
+      } catch (IOException e) {
+        System.out.println("Name: " + IOFile.getName(file) + " " + e);
+      }
+    }
+    else {
+      try {
+        System.out.println("hey folder");
+        File nw = service.files().create(meta)
+             .setFields("id")
+             .execute();
+        System.out.printf("ew file created %s", nw.getId());
+        
+        DriveSearch.updateFolders(file, nw.getId());
+      
+      } catch (IOException e) {
+        System.out.println("Name: " + IOFile.getName(file) + " " + e);
+      }
     }
   }
 }

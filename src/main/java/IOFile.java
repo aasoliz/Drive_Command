@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import java.util.LinkedList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class IOFile {
   private File original;
@@ -61,17 +61,17 @@ public class IOFile {
     return path[len-1];
   }
 
-  public static HashMap<IOFile, String> deep(IOFile fi, DriveSearch ds) throws IOException, InterruptedException {
+  public static LinkedHashMap<IOFile, String> deep(IOFile fi, DriveSearch ds, DriveUpload up) throws IOException, InterruptedException {
     // Initial list of directories to search
     File[] initial = getOriginal(fi).listFiles();
     
     for(File file : initial)
       getSubFiles(fi).add(file);
 
-    return deeper(fi, getSubFiles(fi).size(), new HashMap<IOFile, String>(), ds);
+    return deeper(fi, getSubFiles(fi).size(), new LinkedHashMap<IOFile, String>(), ds, up);
   }
 
-  private static HashMap<IOFile, String> deeper(IOFile fi, int numSize, HashMap<IOFile, String> adding, DriveSearch ds) throws IOException, InterruptedException {
+  private static LinkedHashMap<IOFile, String> deeper(IOFile fi, int numSize, LinkedHashMap<IOFile, String> adding, DriveSearch ds, DriveUpload up) throws IOException, InterruptedException {
     if(numSize == 0)
       return adding;
 
@@ -91,9 +91,6 @@ public class IOFile {
     // Checks if the folder/file was in Drive folders
     if(drive != null && !drive) {
       if(temp.getName().charAt(0) != '.' && temp.getName().charAt(0) != '#') { 
-        DriveUpload up = new DriveUpload();
-        up.types();
-
         adding.put(new IOFile(temp), up.fileType(temp.toPath()));
       }
     }
@@ -107,6 +104,6 @@ public class IOFile {
       numSize = getSubFiles(fi).size();
     }
 
-    return deeper(fi, numSize, adding, ds);
+    return deeper(fi, numSize, adding, ds, up);
   }
 }
