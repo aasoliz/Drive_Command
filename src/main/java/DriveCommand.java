@@ -107,7 +107,6 @@ public class DriveCommand {
     // Name given has to be unique or it could get the wrong folder
     // Name also must be the same in both drive folder and locally
     // Maybe add parent folder so that it can be more precise
-    // Provide whether folder provided is a top folder
     FileList result = service.files().list()
             .setQ("mimeType='application/vnd.google-apps.folder' and name='spring2016' and trashed=false")
             .setSpaces("drive")
@@ -115,8 +114,7 @@ public class DriveCommand {
             .execute();
 
     File file = result.getFiles().get(0);
-    String topFolder = (file.getParents().get(0).split("-"))[0];
-
+    
     DriveDirectory dir = new DriveDirectory(file.getName(), file.getId(), true);
 
     LinkedList<DriveDirectory> root = new LinkedList<DriveDirectory>();
@@ -125,7 +123,7 @@ public class DriveCommand {
     DriveSearch ds = new DriveSearch(service);
     ds.addChildren(root);
 
-    String path = DriveDirectory.getSuperPath(ds, dir, file.getParents().get(0), topFolder);
+    String[] path = DriveDirectory.getSuperPath(ds, dir, file.getParents().get(0));
 
     // DriveSearch ds = new DriveSearch(service);
     // ds.readKnown();

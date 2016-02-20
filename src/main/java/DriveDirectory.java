@@ -52,25 +52,36 @@ public class DriveDirectory {
     return path;
   }
 
-  public static String getSuperPath(DriveSearch ds, DriveDirectory folder, String parentID, String topFolder) throws IOException {
-    String path = "";
+  public static String[] getSuperPath(DriveSearch ds, DriveDirectory folder, String parentID) throws IOException {
+    String initial = "";
 
     File parent = null;
     DriveDirectory temp = null;
 
     do {
+      if(parent != null)
+        parentID = parent.getParents().get(0);
+
       parent = ds.getParent(parentID);
 
       temp = new DriveDirectory(parent.getName(), parent.getId(), true);
       addChild(temp, folder);
 
-      parentID = parent.getParents().get(0);
-      path += parent.getId() + "/";
+      initial += parent.getId() + "/";
 
       folder = temp;
     }
-    while(!(parent.getId().split("-"))[0].equals(topFolder));
-  
+    while(parent.getParents() != null);
+
+    String[] split = initial.split("/");
+    String[] path = new String[split.length];
+
+    int j = 0;
+    for(int i = split.length-1; i > 0; i--) {
+      path[j] = split[i];
+      j++;
+    }
+    
     return path;
   }
 }
