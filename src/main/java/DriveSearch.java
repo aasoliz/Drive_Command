@@ -114,7 +114,7 @@ public class DriveSearch {
     DriveDirectory parent = parents.removeFirst();
 
     FileList result = service.files().list()
-            .setQ("'" + parent.getID() + "' in parents")
+            .setQ("'" + parent.getID() + "' in parents and trashed=false")
             .setSpaces("drive")
             .setFields("files(id, name, mimeType)")
             .execute();

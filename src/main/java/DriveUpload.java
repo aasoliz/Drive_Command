@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import java.nio.file.Path;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -55,29 +56,33 @@ public class DriveUpload {
 
     System.out.println("Files : " + file.getName());
 
-    LinkedList<String> parents = new LinkedList<String>();
+    // LinkedList<String> parents = new LinkedList<String>();
     String [] par = IOFile.parentFolders(file.getOriginal(), file);
 
-    for(int i = 0; i < path.length; i++) {
-      System.out.println(path[i]);
-      parents.add(path[i]);
-    }
+    // for(int i = 0; i < path.length; i++) {
+    //   System.out.println(path[i]);
+    //   parents.add(path[i]);
+    // }
 
-    for(int i = 0; i < par.length; i++) {
-      parents.add(par[i]);
-    }
-
+    // for(int i = 0; i < par.length; i++) {
+    //   parents.add(par[i]);
+    // }
     // parent.add(DriveSearch.getParentId(
     //   IOFile.parentFolder(
     //     file.getOriginal()
     //     )
     //   )
     // );
-
     File meta = new File();
     meta.setName(file.getNameExt());
+    System.out.println(file.getNameExt());
     meta.setMimeType(mimeType);
-    meta.setParents(parents);
+
+    if(par.length == 0)
+      meta.setParents(Collections.singletonList(path[path.length-1]));
+    else
+      meta.setParents(Collections.singletonList(par[par.length-1]));
+      
     meta.setWritersCanShare(true);
     meta.setViewersCanCopyContent(true);
 

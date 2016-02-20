@@ -45,6 +45,7 @@ public class IOFile {
   public String getNameExt() {
     String[] path = this.getOriginal().toPath().toString().split("/");
 
+    System.out.println(path[path.length-1]);
     return path[path.length-1];
   }
 
