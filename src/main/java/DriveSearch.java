@@ -16,26 +16,70 @@ public class DriveSearch {
   private static String folderOrigin = "/home/aasoliz/Documents/Other/Commands/Drive_Command/src/main/resources/FolderMapping.txt";
   private static HashMap<String, String> folders;
   private static Drive service;
+  private static DriveDirectory root;
 
-  public DriveSearch(Drive serve) {
+  public DriveSearch(Drive serve, DriveDirectory rt) {
     service = serve;
+    root = rt;
   }
 
-  public static Boolean inDrive(String find, String parent) throws IOException {
-    FileList result = service.files().list()
-            .setQ("name='" + find + "'")
-            .setSpaces("drive")
-            .setFields("files(id, name, parents)")
-            .execute();
+  public static Boolean inDrive(String find, String[] parents) throws IOException {
+    // FileList result = service.files().list()
+    //         .setQ("name='" + find + "'")
+    //         .setSpaces("drive")
+    //         .setFields("files(id, name, parents)")
+    //         .execute();
 
-    for(File file : result.getFiles()) {
-      if(file.getName().equals(find))
-        if(folders.containsKey(file.getParents().get(0)))
-          if(folders.get(file.getParents().get(0)).equals(parent))
+    Boolean found = false;
+
+    LinkedList<DriveDirectory> children = root.getChildren();
+    DriveDirectory temp = null;
+
+    System.out.println(find);
+
+    int k = 0;
+    while(!found) {
+      if(k < parents.length) {
+        for(DriveDirectory child : children) {
+          System.out.println(child.getName() + " " + parents[k]);
+          if(child.getName().equals(parents[k])) {
+            temp = child;
+            break;
+          }
+
+          else if(child.getName().equals(find)) {
+            System.out.println("yay " + find);
             return true;
+          }
+        }
+      }
+      else
+        return false;
+
+      if(temp != null) {
+        System.out.println("found parent");
+        k++;
+
+        // Children was probably null
+        children = temp.getChildren();
+        if(children == null)
+          return false;
+
+        temp = null;
+      }
+      else 
+        return false;
     }
 
     return false;
+        
+    // for(File file : result.getFiles()) {
+    //   if(file.getName().equals(find))
+    //     if(folders.containsKey(file.getParents().get(0)))
+    //       if(folders.get(file.getParents().get(0)).equals(parent))
+    //         return true;
+    //  }
+    // retu.rn false;
   }
 
   // May not need anymore
@@ -71,10 +115,10 @@ public class DriveSearch {
       
       writer.write(DriveSearch.getParentId(
         IOFile.parentFolder(
-          IOFile.getOriginal(file)
+          file.getOriginal()
           )
         ) +
-        "      " + IOFile.parentFolder(IOFile.getOriginal(file))
+        "      " + IOFile.parentFolder(file.getOriginal())
       );
 
       writer.close();
