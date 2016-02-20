@@ -49,24 +49,35 @@ public class DriveUpload {
     return test;
   }
 
-  public static void uploadFile(IOFile file, String mimeType, Drive service) throws IOException {
+  public static void uploadFile(IOFile file, String mimeType, Drive service, String[] path) throws IOException {
     // TODO: Check if file is folder, add to "foldermappings"
     // TODO: Multipart upload?
 
     System.out.println("Files : " + file.getName());
 
-    LinkedList<String> parent = new LinkedList<String>();
-    parent.add(DriveSearch.getParentId(
-      IOFile.parentFolder(
-        file.getOriginal()
-        )
-      )
-    );
+    LinkedList<String> parents = new LinkedList<String>();
+    String [] par = IOFile.parentFolders(file.getOriginal(), file);
+
+    for(int i = 0; i < path.length; i++) {
+      System.out.println(path[i]);
+      parents.add(path[i]);
+    }
+
+    for(int i = 0; i < par.length; i++) {
+      parents.add(par[i]);
+    }
+
+    // parent.add(DriveSearch.getParentId(
+    //   IOFile.parentFolder(
+    //     file.getOriginal()
+    //     )
+    //   )
+    // );
 
     File meta = new File();
     meta.setName(file.getNameExt());
     meta.setMimeType(mimeType);
-    meta.setParents(parent);
+    meta.setParents(parents);
     meta.setWritersCanShare(true);
     meta.setViewersCanCopyContent(true);
 
@@ -85,13 +96,12 @@ public class DriveUpload {
     }
     else {
       try {
-        System.out.println("hey folder");
         File nw = service.files().create(meta)
              .setFields("id")
              .execute();
-        System.out.printf("ew file created %s", nw.getId());
+        System.out.printf("ew file created %s\n", nw.getId());
         
-        DriveSearch.updateFolders(file, nw.getId());
+        //DriveSearch.updateFolders(file, nw.getId());
       
       } catch (IOException e) {
         System.out.println("Name: " + file.getName() + " " + e);

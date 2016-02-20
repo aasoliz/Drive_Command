@@ -29,8 +29,6 @@ public class DriveSearch {
     LinkedList<DriveDirectory> children = root.getChildren();
     DriveDirectory temp = null;
 
-    System.out.println(find);
-
     int k = 0;
     while(!found) {
       if(k < parents.length + 1) {
@@ -85,10 +83,12 @@ public class DriveSearch {
     return true;
   }
 
+  // May not need anymore
   public static String getParentId(String parent) {
     return folders.get(parent);
   }
 
+  // May not need anymore
   public static void updateFolders(IOFile file, String id) throws IOException {
     try(BufferedWriter writer = new BufferedWriter(new FileWriter(folderOrigin, true))) {
       writer.newLine();

@@ -125,11 +125,21 @@ public class DriveCommand {
     DriveUpload up = new DriveUpload();
     up.types();
 
-    String[] path = DriveDirectory.getSuperPath(ds, dir, file.getParents().get(0));
+    String[] path = DriveDirectory.getSuperPath(ds, dir, file.getParents().get(0), file.getId());
+
+    for(int i = 0; i < path.length; i++)
+      System.out.println(path[i]);
 
     IOFile rootIO = new IOFile("/home/aasoliz/Documents/Classes/spring2016", "spring2016");
     LinkedHashMap<IOFile, String> adding = IOFile.deep(rootIO, ds, up);
 
+    Boolean flag = true;
+    for(Map.Entry<IOFile, String> entry : adding.entrySet())
+      if(flag) {
+        System.out.println(entry.getKey().getName() + " " + entry.getValue());
+        DriveUpload.uploadFile(entry.getKey(), entry.getValue(), service, path);
+        flag = false; 
+      }
 
     // DriveSearch ds = new DriveSearch(service);
     // ds.readKnown();

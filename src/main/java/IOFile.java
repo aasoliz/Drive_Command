@@ -60,6 +60,7 @@ public class IOFile {
     return this.subFiles;
   }
 
+  // May not need anymore
   public static String parentFolder(File file) {
     String[] path = file.getParent().split("/");
 
@@ -109,22 +110,12 @@ public class IOFile {
     File temp = fi.getSubFiles().removeFirst();
     numSize--;
 
-    System.out.println("\n\n\n\n\n\n\n\n\n\n");
     Boolean drive = ds.inDrive(temp.getName(), parentFolders(temp, fi));
-
-    // try {
-    //   drive = ds.inDrive(temp.getName(), parentFolders(temp));
-    // } catch (Exception e) {
-
-    //   Thread.sleep(1000);
-    //   drive = ds.inDrive(temp.getName(), parentFolders(temp));
-    // }
 
     // Checks if the folder/file was in Drive folders
     if(!drive) {
-      if(temp.getName().charAt(0) != '.' && temp.getName().charAt(0) != '#') { 
+      if(temp.getName().charAt(0) != '.' && temp.getName().charAt(0) != '#')
         adding.put(new IOFile(temp, fi.getOriginalFolder()), up.fileType(temp.toPath()));
-      }
     }
     if(temp.isDirectory()) {
       File[] list = temp.listFiles();
