@@ -24,12 +24,6 @@ public class DriveSearch {
   }
 
   public static Boolean inDrive(String find, String[] parents) throws IOException {
-    // FileList result = service.files().list()
-    //         .setQ("name='" + find + "'")
-    //         .setSpaces("drive")
-    //         .setFields("files(id, name, parents)")
-    //         .execute();
-
     Boolean found = false;
 
     LinkedList<DriveDirectory> children = root.getChildren();
@@ -39,28 +33,22 @@ public class DriveSearch {
 
     int k = 0;
     while(!found) {
-      if(k < parents.length) {
+      if(k < parents.length + 1) {
         for(DriveDirectory child : children) {
-          System.out.println(child.getName() + " " + parents[k]);
-          if(child.getName().equals(parents[k])) {
+          if(k < parents.length && child.getName().equals(parents[k])) {
             temp = child;
             break;
           }
-
-          else if(child.getName().equals(find)) {
-            System.out.println("yay " + find);
+          else if(child.getName().equals(find))
             return true;
-          }
         }
       }
       else
         return false;
 
       if(temp != null) {
-        System.out.println("found parent");
         k++;
 
-        // Children was probably null
         children = temp.getChildren();
         if(children == null)
           return false;
@@ -72,14 +60,6 @@ public class DriveSearch {
     }
 
     return false;
-        
-    // for(File file : result.getFiles()) {
-    //   if(file.getName().equals(find))
-    //     if(folders.containsKey(file.getParents().get(0)))
-    //       if(folders.get(file.getParents().get(0)).equals(parent))
-    //         return true;
-    //  }
-    // retu.rn false;
   }
 
   // May not need anymore
