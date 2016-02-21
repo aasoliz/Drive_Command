@@ -36,30 +36,43 @@ public class IOFile {
     isDirectory = original.isDirectory();
   }
 
+  /** Name of user provided folder @return Name of inital folder */
   public String getOriginalFolder() {
     return this.originalFolder;
   }
 
+  /** Local file @return java.io.File of local file */
   public File getOriginal() {
     return this.original;
   }
 
+  /** Name of local file @return Name of local file */
   public String getName() {
     return this.name;
   }
 
+  /** Immediate parent folder @return Parent folder of file */
   public File getParent() {
     return this.parent;
   }
 
+  /** Is the IOFile a folder or file @return Whether the local file is a folder or file */
   public Boolean getDirectory() {
     return this.isDirectory;
   }
 
+  /** List of children files/folders @return List of children */
   public LinkedList<File> getSubFiles() {
     return this.subFiles;
   }
 
+  /**
+  *  Returns parent folders from user given folder.
+  *
+  *  @param file - Local file
+  *  @param fi - IOFile used to get the user provided folder
+  *  @return Portion of the absolute path starting from the previously provided folder
+  */
   public static String[] parentFolders(File file, IOFile fi) {
     String originalFolder = fi.getOriginalFolder();
 
@@ -84,7 +97,16 @@ public class IOFile {
     return fin_path;
   }
 
-  public static LinkedHashMap<IOFile, String> deep(IOFile fi, DriveSearch ds, DriveUpload up) throws IOException, InterruptedException {
+  /**
+  *  Gets the initial list of folders to search
+  *  
+  *  @param fi - Starting folder to search
+  *  @param ds - Drive searching
+  *  @param up - File type getter for files
+  *  @return LinkedHashMap of the local files not in Drive
+  *  @throws IOException
+  */
+  public static LinkedHashMap<IOFile, String> deep(IOFile fi, DriveSearch ds, DriveUpload up) throws IOException {
     // Initial list of directories to search
     File[] initial = fi.getOriginal().listFiles();
     
@@ -94,7 +116,19 @@ public class IOFile {
     return deeper(fi, fi.getSubFiles().size(), new LinkedHashMap<IOFile, String>(), ds, up);
   }
 
-  private static LinkedHashMap<IOFile, String> deeper(IOFile fi, int numSize, LinkedHashMap<IOFile, String> adding, DriveSearch ds, DriveUpload up) throws IOException, InterruptedException {
+  /**
+  *  Recursively processes sub folders and files. Checks if they are in Drive and if not are added
+  *  to the list of files to add. Excludes any temporary local files.
+  *
+  *  @param fi - Current folder that is being indexed
+  *  @param numSize - Number of folders left to go through
+  *  @param adding - List of files that need to be uploaded to Drive
+  *  @param ds - Drive searching
+  *  @param up - File type getter for files
+  *  @return  LinkedHashMap of the local files not in Drive
+  *  @throws IOException
+  */
+  private static LinkedHashMap<IOFile, String> deeper(IOFile fi, int numSize, LinkedHashMap<IOFile, String> adding, DriveSearch ds, DriveUpload up) throws IOException {
     if(numSize == 0)
       return adding;
 

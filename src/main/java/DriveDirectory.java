@@ -19,14 +19,24 @@ public class DriveDirectory {
     folder = flag;
   }
 
+  /** Name of Drive file @return Name of Drive file */
   public String getName() { return this.name; }
 
+  /** Id of Drive file @return ID of Drive file */
   public String getID() { return this.id; }
 
+  /** Children (files/folders) of folder @return Children of folder */
   public LinkedList<DriveDirectory> getChildren() { return this.children; }
 
+  /** Parent folders of file @return List of parent folder for file */
   public LinkedList<DriveDirectory> getParents() { return this.parents; }
 
+  /**
+  *  Creates a parent to child relationship.
+  *  
+  *  @param parent Parent folder in Drive
+  *  @param child  Child folder/file contained in parent
+  */
   public static void addChild(DriveDirectory parent, DriveDirectory child) {
     if(parent.children == null)
       parent.children = new LinkedList<DriveDirectory>();
@@ -41,18 +51,34 @@ public class DriveDirectory {
     parent.children.add(child);
   }
 
+  /**
+  *  Adds the given Drive file to the tree of previously indexed files/folders
+  *  from Google Drive. Used after a local file/folder has been uploaded to Drive.
+  *
+  *  @param d - Newly uploaded file
+  *  @param f - Local file and information
+  *  @param folder - Boolean specifying if 'f' is a file or folder 
+  */
   public void addDir(File d, IOFile f, Boolean folder) {
     String[] parents = IOFile.parentFolders(f.getOriginal(), f);
 
     DriveDirectory nw = new DriveDirectory(f.getName(), d.getId(), folder);
     DriveDirectory parent = getDriveParent(parents);
-    System.out.println(parent);
 
     addChild(parent, nw);
   }
 
-  // Assumes it will find all parent folders
+  /**
+  *  Gets the last parent folder, which will be used to 
+  *  get the id for uploading. Or will be used to update
+  *  the indexed Drive tree. The method assumes it will 
+  *  find all parent folders.
+  *
+  *  @param parents - List of parent folders
+  *  @return Last parent folder (destination folder)
+  */
   public DriveDirectory getDriveParent(String[] parents) {
+    // If the folder is the top level folder
     if(parents.length == 0)
       return this;
 
@@ -73,10 +99,13 @@ public class DriveDirectory {
         k++;
         children = temp.getChildren();
       }
+      // Used to prevent an infinite loop
+      // in case a parent is not found.
+      // Should not get here.
       else {
-        System.out.println("Should not get here");
         found = true;
       }
+      // Found all parents
       if(k == parents.length)
         return temp;
       
@@ -84,17 +113,5 @@ public class DriveDirectory {
     }
 
     return null;
-  }
-
-  // Check if works, but don't use it 
-  public static String getPath(DriveDirectory getTo) {
-    int len = getTo.getParents().size();
-
-    String path = "";
-
-    for(int i = 0; i < len; i++)
-      path += getTo.parents.get(i).getID() + "/";
-
-    return path;
   }
 }

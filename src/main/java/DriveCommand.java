@@ -13,9 +13,15 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.*;
 import com.google.api.services.drive.Drive;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -23,10 +29,12 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+
+
+// import org.json.simple.JSONArray;
+// import org.json.simple.JSONObject;
+// import org.json.simple.parser.JSONParser;
+// import org.json.simple.parser.ParseException;
 
 public class DriveCommand {
   /** Application name. */
@@ -104,28 +112,79 @@ public class DriveCommand {
               .build();
   }
 
-  public static Integer getErrorCode(Exception e) {
-    JSONParser parser = new JSONParser();
+  /**
+  *  Parse JSON that was received from the Drive API
+  *  because of an error.
+  *
+  *  @param e - Exception that was thrown
+  *  @return LinkedList with the error code and message
+  */
+  public static LinkedList getErrorCode(Exception e) {
+    JsonObject o = new JsonParser()
+              .parse(e.toString())
+              .getAsJsonObject();
 
-    try {
-      Object o = parser.parse(e);
-      JSONArray array = (JSONArray) o;
+    LinkedList error = new LinkedList();
+    error.add(o.get("code").getAsInt());
+    error.add(o.get("message").getAsString());
 
-      
-
-    } catch (ParseException e) {
-      return -1;
-    }
+    return error;
   }
 
-  public static void main(String[] args) throws IOException, InterruptedException {
-    // Build a new authorized API client service.
+  /**
+  *  (For now) Writes out caught errors to a log file.
+  *
+  *  @param error - Parsed JSON error code and message
+  *  @param e - Exception that was thrown
+  *  @throws IOException - If the file was not found or created
+  */
+  public static void handleError(LinkedList error, Exception e) throws IOException {
+    FileWriter writer = new FileWriter(new java.io.File("log"));
+
+    Integer code = (Integer) error.removeFirst();
+    String msg = (String) error.removeFirst();
+
+    // Convert stacktrace to String
+    StringWriter sw = new StringWriter();
+    e.printStackTrace(new PrintWriter(sw));
+
+    // TODO: Take actions to resolve errors
+    switch(code) {
+        case 400:
+        case 401:
+        case 403:
+        case 404:
+        case 500:
+          writer.write("code: " + code + " " + msg + "\n");
+          writer.write(sw.toString());
+          writer.write("\n");
+          break;
+        default:
+          writer.write(sw.toString());
+    }
+
+    writer.close();
+  }
+
+  public static void main(String[] args) throws IOException {
     // TODO: Make sure to catch if not authenticated
-    Drive service = getDriveService();
+    Drive service = null;
+
+    // Build a new authorized API client service.
+    try {
+      service = getDriveService();
+    } catch (IOException e) {
+      LinkedList code = DriveCommand.getErrorCode(e);
+
+      if(code != null)
+        DriveCommand.handleError(code, e);
+      else
+        e.printStackTrace();
+    }
 
     // Name given has to be unique or it could get the wrong folder
     // Name also must be the same in both drive folder and locally
-    // Maybe add parent folder so that it can be more precise
+    // Maybe add parent folder so that it can be more precise?
     FileList result = service.files().list()
             .setQ("mimeType='application/vnd.google-apps.folder' and name='spring2016' and trashed=false")
             .setSpaces("drive")
@@ -134,19 +193,24 @@ public class DriveCommand {
 
     File file = result.getFiles().get(0);
     
+    // Initializes a structure that will hold what files are in
+    //  the given drive folder
     DriveDirectory dir = new DriveDirectory(file.getName(), file.getId(), true);
     LinkedList<DriveDirectory> root = new LinkedList<DriveDirectory>();
     root.add(dir);
 
+    // Indexes the provided Google Drive folder
     DriveSearch ds = new DriveSearch(service, dir);
     ds.addChildren(root);
-    
+
     DriveUpload up = new DriveUpload(service, dir);
     up.types();
 
+    // Indexes the local folder, checking which files are in Drive
     IOFile rootIO = new IOFile("/home/aasoliz/Documents/Classes/spring2016", "spring2016");
     LinkedHashMap<IOFile, String> adding = IOFile.deep(rootIO, ds, up);
 
+    // Upload all the local files that were not in Drive
     Boolean flag = true;
     for(Map.Entry<IOFile, String> entry : adding.entrySet())
       if(flag) {
