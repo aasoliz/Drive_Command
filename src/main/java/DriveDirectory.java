@@ -86,6 +86,7 @@ public class DriveDirectory {
     return null;
   }
 
+  // Check if works, but don't use it 
   public static String getPath(DriveDirectory getTo) {
     int len = getTo.getParents().size();
 
@@ -94,42 +95,6 @@ public class DriveDirectory {
     for(int i = 0; i < len; i++)
       path += getTo.parents.get(i).getID() + "/";
 
-    return path;
-  }
-
-  public static String[] getSuperPath(DriveSearch ds, DriveDirectory folder, String parentID, String fileID) throws IOException {
-    String initial = "";
-
-    File parent = null;
-    DriveDirectory temp = null;
-
-    do {
-      if(parent != null)
-        parentID = parent.getParents().get(0);
-
-      parent = ds.getParent(parentID);
-
-      temp = new DriveDirectory(parent.getName(), parent.getId(), true);
-      addChild(temp, folder);
-
-      initial += parent.getId() + "/";
-
-      folder = temp;
-    }
-    while(parent.getParents() != null);
-
-    String[] split = initial.split("/");
-
-    String[] path = new String[split.length+1];
-
-    int j = 0;
-    for(int i = split.length-1; i >= 0; i--) {
-      path[j] = split[i];
-      j++;
-    }
-
-    path[path.length-1] = fileID;
-    
     return path;
   }
 }

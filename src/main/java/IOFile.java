@@ -1,5 +1,3 @@
-import com.google.api.services.drive.Drive;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -50,13 +48,6 @@ public class IOFile {
     return this.name;
   }
 
-  // public String getNameExt() {
-  //   String[] path = this.getOriginal().toPath().toString().split("/");
-
-  //   System.out.println(path[path.length-1]);
-  //   return path[path.length-1];
-  // }
-
   public File getParent() {
     return this.parent;
   }
@@ -67,15 +58,6 @@ public class IOFile {
 
   public LinkedList<File> getSubFiles() {
     return this.subFiles;
-  }
-
-  // May not need anymore
-  public static String parentFolder(File file) {
-    String[] path = file.getParent().split("/");
-
-    int len = path.length;
-
-    return path[len-1];
   }
 
   public static String[] parentFolders(File file, IOFile fi) {

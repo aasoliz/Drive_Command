@@ -23,6 +23,11 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 public class DriveCommand {
   /** Application name. */
   private static final String APPLICATION_NAME =
@@ -99,6 +104,20 @@ public class DriveCommand {
               .build();
   }
 
+  public static Integer getErrorCode(Exception e) {
+    JSONParser parser = new JSONParser();
+
+    try {
+      Object o = parser.parse(e);
+      JSONArray array = (JSONArray) o;
+
+      
+
+    } catch (ParseException e) {
+      return -1;
+    }
+  }
+
   public static void main(String[] args) throws IOException, InterruptedException {
     // Build a new authorized API client service.
     // TODO: Make sure to catch if not authenticated
@@ -122,10 +141,8 @@ public class DriveCommand {
     DriveSearch ds = new DriveSearch(service, dir);
     ds.addChildren(root);
     
-    DriveUpload up = new DriveUpload();
+    DriveUpload up = new DriveUpload(service, dir);
     up.types();
-
-    String[] path = DriveDirectory.getSuperPath(ds, dir, file.getParents().get(0), file.getId());
 
     IOFile rootIO = new IOFile("/home/aasoliz/Documents/Classes/spring2016", "spring2016");
     LinkedHashMap<IOFile, String> adding = IOFile.deep(rootIO, ds, up);
@@ -133,21 +150,8 @@ public class DriveCommand {
     Boolean flag = true;
     for(Map.Entry<IOFile, String> entry : adding.entrySet())
       if(flag) {
-        //System.out.println(entry.getKey().getName() + " " + entry.getValue());
-        DriveUpload.uploadFile(entry.getKey(), entry.getValue(), service, dir);
+        DriveUpload.uploadFile(entry.getKey(), entry.getValue());
         flag = false; 
-     }
-
-    // DriveSearch ds = new DriveSearch(service);
-    // ds.readKnown();
-
-
-    // Boolean flag = true;
-    // for(Map.Entry<IOFile, String> entry : adding.entrySet())
-    //   if(flag) {
-    //     System.out.println(IOFile.getName(entry.getKey()) + " " + entry.getValue());
-    //     DriveUpload.uploadFile(entry.getKey(), entry.getValue(), service);
-    //     flag = false; 
-    //   }
+      }
   }
 }

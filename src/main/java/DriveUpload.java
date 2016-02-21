@@ -17,8 +17,13 @@ import java.util.LinkedList;
 
 public class DriveUpload {
   private static HashMap<String, String> mimeType;
+  private static Drive service;
+  private static DriveDirectory root;
 
-  public DriveUpload() {}
+  public DriveUpload(Drive serve, DriveDirectory rt) {
+    service = serve;
+    root = rt;
+  }
 
   public static Boolean types() throws IOException {
     mimeType = new HashMap<String, String>();
@@ -51,49 +56,23 @@ public class DriveUpload {
     return test;
   }
 
-  public static void uploadFile(IOFile file, String mimeType, Drive service, DriveDirectory root) throws IOException {
-    // TODO: Check if file is folder, add to "foldermappings"
+  public static void uploadFile(IOFile file, String mimeType) throws IOException {
     // TODO: Multipart upload?
 
     System.out.println("Files : " + file.getName());
 
-    // LinkedList<String> parents = new LinkedList<String>();
-    String [] par = IOFile.parentFolders(file.getOriginal(), file);
-
-    for(String g : par)
-      System.out.println(g + "/");
-
-    // for(int i = 0; i < path.length; i++) {
-    //   System.out.println(path[i]);
-    //   parents.add(path[i]);
-    // }
-
-    // for(int i = 0; i < par.length; i++) {
-    //   parents.add(par[i]);
-    // }
-    // parent.add(DriveSearch.getParentId(
-    //   IOFile.parentFolder(
-    //     file.getOriginal()
-    //     )
-    //   )
-    // );
     File meta = new File();
     meta.setName(file.getName());
-    System.out.println(file.getName());
     meta.setMimeType(mimeType);
 
     String parentId = root.getDriveParent(IOFile.parentFolders(file.getOriginal(), file)).getID();
-    System.out.println(parentId);
-
     meta.setParents(Collections.singletonList(parentId));
       
     meta.setWritersCanShare(true);
     meta.setViewersCanCopyContent(true);
 
     if(!mimeType.equals("application/vnd.google-apps.folder")) {
-      java.io.File f = file.getOriginal();
-
-      FileContent mediaContent = new FileContent(mimeType, f);
+      FileContent mediaContent = new FileContent(mimeType, file.getOriginal());
 
       try {
         File nw = service.files().create(meta, mediaContent)
@@ -102,8 +81,6 @@ public class DriveUpload {
 
         // Add newly created drive folder to the Drive directory
         root.addDir(nw, file, false);
-
-        System.out.printf("ew file created %s", nw.getId());
 
       } catch (IOException e) {
         System.out.println("Name: " + file.getName() + " " + e);
@@ -114,13 +91,10 @@ public class DriveUpload {
         File nw = service.files().create(meta)
              .setFields("id")
              .execute();
-        System.out.printf("ew file created %s\n", nw.getId());
         
         // Add newly created drive folder to the Drive directory
         root.addDir(nw, file, true);
-        
-        //DriveSearch.updateFolders(file, nw.getId());
-      
+
       } catch (IOException e) {
         System.out.println("Name: " + file.getName() + " " + e);
       }

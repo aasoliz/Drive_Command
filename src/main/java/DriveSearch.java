@@ -2,19 +2,11 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.*;
 import com.google.api.services.drive.Drive;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 
 public class DriveSearch {
-  // TODO: Save in hidden app folder, so don't have to read over and over
-  private static String folderOrigin = "/home/aasoliz/Documents/Other/Commands/Drive_Command/src/main/resources/FolderMapping.txt";
-  private static HashMap<String, String> folders;
   private static Drive service;
   private static DriveDirectory root;
 
@@ -23,7 +15,7 @@ public class DriveSearch {
     root = rt;
   }
 
-  public static Boolean inDrive(String find, String[] parents) throws IOException {
+  public Boolean inDrive(String find, String[] parents) throws IOException {
     Boolean found = false;
 
     LinkedList<DriveDirectory> children = root.getChildren();
@@ -60,53 +52,6 @@ public class DriveSearch {
     return false;
   }
 
-  // May not need anymore
-  public static Boolean readKnown() {
-    folders = new HashMap<String, String>();
-
-    try(BufferedReader reader = new BufferedReader(new FileReader(folderOrigin))) {
-      String curr;
-      String[] parsed;
-
-      while((curr = reader.readLine()) != null) {
-        parsed = curr.split("\\s+");
-        folders.put(parsed[0], parsed[1]);
-      }
-
-      reader.close();
-
-    } catch (IOException e) {
-      e.printStackTrace();
-      return false;
-    }
-
-    return true;
-  }
-
-  // May not need anymore
-  public static String getParentId(String parent) {
-    return folders.get(parent);
-  }
-
-  // May not need anymore
-  public static void updateFolders(IOFile file, String id) throws IOException {
-    try(BufferedWriter writer = new BufferedWriter(new FileWriter(folderOrigin, true))) {
-      writer.newLine();
-      
-      writer.write(DriveSearch.getParentId(
-        IOFile.parentFolder(
-          file.getOriginal()
-          )
-        ) +
-        "      " + IOFile.parentFolder(file.getOriginal())
-      );
-
-      writer.close();
-    } catch (IOException e) {
-      System.out.println(e);
-    }
-  }
-
   public static LinkedList<DriveDirectory> addChildren(LinkedList<DriveDirectory> parents) throws IOException {
     if(parents.size() == 0)
       return parents;
@@ -136,8 +81,15 @@ public class DriveSearch {
   }
 
   public static File getParent(String parentID) throws IOException {
-    return service.files().get(parentID)
-            .setFields("id, name, parents")
-            .execute();
+    File result;
+    try {
+      result = service.files().get(parentID)
+              .setFields("id, name, parents")
+              .execute();
+    } catch (IOException e) {
+      System.out.println("asdhf");
+    }
+
+    return result;
   }
 }
