@@ -134,7 +134,7 @@ public class DriveCommand {
     for(Map.Entry<IOFile, String> entry : adding.entrySet())
       if(flag) {
         //System.out.println(entry.getKey().getName() + " " + entry.getValue());
-        DriveUpload.uploadFile(entry.getKey(), entry.getValue(), service, path);
+        DriveUpload.uploadFile(entry.getKey(), entry.getValue(), service, dir);
         flag = false; 
      }
 

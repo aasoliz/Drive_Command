@@ -41,6 +41,51 @@ public class DriveDirectory {
     parent.children.add(child);
   }
 
+  public void addDir(File d, IOFile f, Boolean folder) {
+    String[] parents = IOFile.parentFolders(f.getOriginal(), f);
+
+    DriveDirectory nw = new DriveDirectory(f.getName(), d.getId(), folder);
+    DriveDirectory parent = getDriveParent(parents);
+    System.out.println(parent);
+
+    addChild(parent, nw);
+  }
+
+  // Assumes it will find all parent folders
+  public DriveDirectory getDriveParent(String[] parents) {
+    if(parents.length == 0)
+      return this;
+
+    DriveDirectory temp = null;
+    Boolean found = false;
+    
+    LinkedList<DriveDirectory> children = getChildren();
+
+    int k = 0;
+    while(!found) {
+      for(DriveDirectory child : children) {
+        if(k < parents.length && child.getName().equals(parents[k])) {
+          temp = child;
+          break;
+        }
+      }
+      if(temp != null) {
+        k++;
+        children = temp.getChildren();
+      }
+      else {
+        System.out.println("Should not get here");
+        found = true;
+      }
+      if(k == parents.length)
+        return temp;
+      
+      temp = null;
+    }
+
+    return null;
+  }
+
   public static String getPath(DriveDirectory getTo) {
     int len = getTo.getParents().size();
 

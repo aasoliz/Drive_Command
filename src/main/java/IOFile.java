@@ -10,7 +10,7 @@ public class IOFile {
   private String originalFolder;
   private File original;
   private String name;
-  private String parents;
+  private File parent;
   private Boolean isDirectory;
   private LinkedList<File> subFiles = new LinkedList<File>();
 
@@ -18,7 +18,7 @@ public class IOFile {
     originalFolder = top;
     original = new File(root);
     name = original.getName();
-    parents = original.getParent();
+    parent = null;
     isDirectory = original.isDirectory();
   }
 
@@ -26,7 +26,15 @@ public class IOFile {
     originalFolder = top;
     original = root;
     name = original.getName();
-    parents = original.getParent();
+    parent = null;
+    isDirectory = original.isDirectory();
+  }
+
+  public IOFile(File root, String top, IOFile par) {
+    originalFolder = top;
+    original = root;
+    name = original.getName();
+    parent = par.getOriginal();
     isDirectory = original.isDirectory();
   }
 
@@ -42,15 +50,15 @@ public class IOFile {
     return this.name;
   }
 
-  public String getNameExt() {
-    String[] path = this.getOriginal().toPath().toString().split("/");
+  // public String getNameExt() {
+  //   String[] path = this.getOriginal().toPath().toString().split("/");
 
-    System.out.println(path[path.length-1]);
-    return path[path.length-1];
-  }
+  //   System.out.println(path[path.length-1]);
+  //   return path[path.length-1];
+  // }
 
-  public String getParents() {
-    return this.parents;
+  public File getParent() {
+    return this.parent;
   }
 
   public Boolean getDirectory() {
@@ -116,7 +124,7 @@ public class IOFile {
     // Checks if the folder/file was in Drive folders
     if(!drive) {
       if(temp.getName().charAt(0) != '.' && temp.getName().charAt(0) != '#')
-        adding.put(new IOFile(temp, fi.getOriginalFolder()), up.fileType(temp.toPath()));
+        adding.put(new IOFile(temp, fi.getOriginalFolder(), fi), up.fileType(temp.toPath()));
     }
     if(temp.isDirectory()) {
       File[] list = temp.listFiles();

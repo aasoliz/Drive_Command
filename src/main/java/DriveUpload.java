@@ -6,6 +6,7 @@ import com.google.api.services.drive.Drive;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 
 import java.nio.file.Path;
 
@@ -50,7 +51,7 @@ public class DriveUpload {
     return test;
   }
 
-  public static void uploadFile(IOFile file, String mimeType, Drive service, String[] path) throws IOException {
+  public static void uploadFile(IOFile file, String mimeType, Drive service, DriveDirectory root) throws IOException {
     // TODO: Check if file is folder, add to "foldermappings"
     // TODO: Multipart upload?
 
@@ -58,6 +59,9 @@ public class DriveUpload {
 
     // LinkedList<String> parents = new LinkedList<String>();
     String [] par = IOFile.parentFolders(file.getOriginal(), file);
+
+    for(String g : par)
+      System.out.println(g + "/");
 
     // for(int i = 0; i < path.length; i++) {
     //   System.out.println(path[i]);
@@ -74,25 +78,31 @@ public class DriveUpload {
     //   )
     // );
     File meta = new File();
-    meta.setName(file.getNameExt());
-    System.out.println(file.getNameExt());
+    meta.setName(file.getName());
+    System.out.println(file.getName());
     meta.setMimeType(mimeType);
 
-    if(par.length == 0)
-      meta.setParents(Collections.singletonList(path[path.length-1]));
-    else
-      meta.setParents(Collections.singletonList(par[par.length-1]));
+    String parentId = root.getDriveParent(IOFile.parentFolders(file.getOriginal(), file)).getID();
+    System.out.println(parentId);
+
+    meta.setParents(Collections.singletonList(parentId));
       
     meta.setWritersCanShare(true);
     meta.setViewersCanCopyContent(true);
 
     if(!mimeType.equals("application/vnd.google-apps.folder")) {
-      FileContent mediaContent = new FileContent(mimeType, file.getOriginal());
+      java.io.File f = file.getOriginal();
+
+      FileContent mediaContent = new FileContent(mimeType, f);
 
       try {
         File nw = service.files().create(meta, mediaContent)
              .setFields("id")
              .execute();
+
+        // Add newly created drive folder to the Drive directory
+        root.addDir(nw, file, false);
+
         System.out.printf("ew file created %s", nw.getId());
 
       } catch (IOException e) {
@@ -105,6 +115,9 @@ public class DriveUpload {
              .setFields("id")
              .execute();
         System.out.printf("ew file created %s\n", nw.getId());
+        
+        // Add newly created drive folder to the Drive directory
+        root.addDir(nw, file, true);
         
         //DriveSearch.updateFolders(file, nw.getId());
       
