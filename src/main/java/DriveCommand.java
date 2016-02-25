@@ -213,8 +213,6 @@ public class DriveCommand {
       System.exit(2);
     }
 
-    System.out.println(file.getName());
-    
     // Initializes a structure that will hold what files are in
     //  the given drive folder
     DriveDirectory dir = new DriveDirectory(file.getName(), file.getId(), true);
@@ -229,7 +227,6 @@ public class DriveCommand {
     up.types();
 
     java.io.File loc = new java.io.File(local);
-    System.out.println(loc.exists());
     if(!loc.exists()) {
       System.out.println("Inputed path was not valid");
       System.exit(3);
@@ -240,11 +237,7 @@ public class DriveCommand {
     LinkedHashMap<IOFile, String> adding = IOFile.deep(rootIO, ds, up);
 
     // Upload all the local files that were not in Drive
-    Boolean flag = true;
     for(Map.Entry<IOFile, String> entry : adding.entrySet())
-      if(flag) {
-        DriveUpload.uploadFile(entry.getKey(), entry.getValue());
-        flag = false; 
-      }
+      DriveUpload.uploadFile(entry.getKey(), entry.getValue());
   }
 }
