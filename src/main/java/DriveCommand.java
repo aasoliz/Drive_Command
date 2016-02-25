@@ -170,6 +170,20 @@ public class DriveCommand {
     // TODO: Make sure to catch if not authenticated
     Drive service = null;
 
+    String drive = null;
+    String local = null;
+
+    if(args.length == 0) {
+      System.out.println("Please give an input folder");
+      System.exit(1);
+    }
+    else if(args.length == 1) {
+      local = args[0];
+      
+      String[] temp = local.split("[\\/]");
+      drive = temp[temp.length-1];
+    }
+
     // Build a new authorized API client service.
     try {
       service = getDriveService();
@@ -186,12 +200,20 @@ public class DriveCommand {
     // Name also must be the same in both drive folder and locally
     // Maybe add parent folder so that it can be more precise?
     FileList result = service.files().list()
-            .setQ("mimeType='application/vnd.google-apps.folder' and name='spring2016' and trashed=false")
+            .setQ("mimeType='application/vnd.google-apps.folder' and name='" + drive + "' and trashed=false")
             .setSpaces("drive")
             .setFields("files(id, name, parents)")
             .execute();
 
-    File file = result.getFiles().get(0);
+    File file = null;
+    if(result.getFiles().size() > 0)
+      file = result.getFiles().get(0);
+    else {
+      System.out.println(drive + " was not found in Drive");
+      System.exit(2);
+    }
+
+    System.out.println(file.getName());
     
     // Initializes a structure that will hold what files are in
     //  the given drive folder
@@ -206,8 +228,15 @@ public class DriveCommand {
     DriveUpload up = new DriveUpload(service, dir);
     up.types();
 
+    java.io.File loc = new java.io.File(local);
+    System.out.println(loc.exists());
+    if(!loc.exists()) {
+      System.out.println("Inputed path was not valid");
+      System.exit(3);
+    }
+
     // Indexes the local folder, checking which files are in Drive
-    IOFile rootIO = new IOFile("/home/aasoliz/Documents/Classes/spring2016", "spring2016");
+    IOFile rootIO = new IOFile(loc, drive);
     LinkedHashMap<IOFile, String> adding = IOFile.deep(rootIO, ds, up);
 
     // Upload all the local files that were not in Drive

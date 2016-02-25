@@ -12,14 +12,6 @@ public class IOFile {
   private Boolean isDirectory;
   private LinkedList<File> subFiles = new LinkedList<File>();
 
-  public IOFile(String root, String top) {
-    originalFolder = top;
-    original = new File(root);
-    name = original.getName();
-    parent = null;
-    isDirectory = original.isDirectory();
-  }
-
   public IOFile(File root, String top) {
     originalFolder = top;
     original = root;

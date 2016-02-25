@@ -16,3 +16,9 @@ dependencies {
     compile 'com.google.apis:google-api-services-drive:v3-rev6-1.20.0'
     compile 'com.google.code.gson:gson:2.6.1'
 }
+
+run {
+  if ( project.hasProperty("arguments") ) {
+    args Eval.me(arguments)
+  }
+}
