@@ -16,6 +16,9 @@ import com.google.api.services.drive.Drive;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.awt.FileDialog;
+import java.awt.Frame;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +32,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 // import org.json.simple.JSONArray;
@@ -173,7 +177,7 @@ public class DriveCommand {
     String drive = null;
     String local = null;
 
-    /* if(args.length == 0) {
+     if(args.length == 0) {
       System.out.println("Please give an input folder");
       System.exit(1);
     }
@@ -182,12 +186,23 @@ public class DriveCommand {
       
       String[] temp = local.split("[\\/]");
       drive = temp[temp.length-1];
-      } */
+    }
+    else {
+      JFileChooser chooser = new JFileChooser();
+      chooser.setCurrentDirectory(new java.io.File("."));
+      chooser.setDialogTitle("title");
+      chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      chooser.setAcceptAllFileFilterUsed(false);
 
-    local = JOptionPane.showInputDialog("Enter a folder path. \nThe folder must have the same name as a folder in your Google Drive folder.");
+      if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+        local = chooser.getSelectedFile().toString();
+      }
 
-    String[] temp = local.split("[\\/]");
-    drive = temp[temp.length-1];
+      // local = JOptionPane.showInputDialog("Enter a folder path. \nThe folder must have the same name as a folder in your Google Drive folder.");
+
+      String[] temp = local.split("[\\/]");
+      drive = temp[temp.length-1];
+    }
 
     // Build a new authorized API client service.
     try {
