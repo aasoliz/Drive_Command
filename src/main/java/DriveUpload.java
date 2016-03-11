@@ -6,6 +6,10 @@ import com.google.api.services.drive.Drive;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import java.lang.InterruptedException;
 
 import java.nio.file.Path;
 
@@ -17,6 +21,7 @@ public class DriveUpload {
   private static HashMap<String, String> mimeType;
   private static Drive service;
   private static DriveDirectory root;
+  private final InputStream is = Class.getResourceAsStream("mimeTypeMapping.txt");
 
   public DriveUpload(Drive serve, DriveDirectory rt) {
     service = serve;
@@ -30,9 +35,9 @@ public class DriveUpload {
   *  @return Whether the method was successful
   *  @throws IOException - If the file was not found or could not be read
   */
-  public static Boolean types() throws IOException {
+  public static Boolean types(DriveUpload up) throws IOException {
     mimeType = new HashMap<String, String>();
-    try(BufferedReader reader = new BufferedReader(new FileReader("/home/aasoliz/Documents/Other/Commands/Drive_Command/src/main/resources/mimeTypeMapping.txt"))) {
+    try(BufferedReader reader = new BufferedReader(new InputStreamReader(up.is))) {
       String curr;
       String[] parsed;
       while((curr = reader.readLine()) != null) {
@@ -78,7 +83,7 @@ public class DriveUpload {
   *  @param mimeType - Type of file that is to be uploaded
   *  @throws IOException - If upload was unsuccessful
   */
-  public static void uploadFile(IOFile file, String mimeType) throws IOException {
+public static void uploadFile(IOFile file, String mimeType) throws IOException, InterruptedException {
     // TODO: Multipart upload?
 
     System.out.println("Files : " + file.getName());

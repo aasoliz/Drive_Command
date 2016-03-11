@@ -16,15 +16,14 @@ import com.google.api.services.drive.Drive;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import java.awt.FileDialog;
-import java.awt.Frame;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+
+import java.lang.InterruptedException;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -142,7 +141,7 @@ public class DriveCommand {
   *  @param e - Exception that was thrown
   *  @throws IOException - If the file was not found or created
   */
-  public static void handleError(LinkedList error, Exception e) throws IOException {
+  public static void handleError(LinkedList error, Exception e) throws IOException, InterruptedException {
     FileWriter writer = new FileWriter(new java.io.File("log"));
 
     Integer code = (Integer) error.removeFirst();
@@ -154,9 +153,13 @@ public class DriveCommand {
 
     // TODO: Take actions to resolve errors
     switch(code) {
+        case 403:
+          writer.write("code: " + code + " " + msg + "\n");
+          writer.write(sw.toString());
+          writer.write("\n");
+          Thread.sleep(1000);
         case 400:
         case 401:
-        case 403:
         case 404:
         case 500:
           writer.write("code: " + code + " " + msg + "\n");
@@ -170,38 +173,38 @@ public class DriveCommand {
     writer.close();
   }
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, InterruptedException {
     // TODO: Make sure to catch if not authenticated
     Drive service = null;
 
     String drive = null;
     String local = null;
 
-     if(args.length == 0) {
-      System.out.println("Please give an input folder");
-      System.exit(1);
-    }
-    else if(args.length == 1) {
+    if(args.length == 1) {
       local = args[0];
       
       String[] temp = local.split("[\\/]");
       drive = temp[temp.length-1];
     }
     else {
-      JFileChooser chooser = new JFileChooser();
-      chooser.setCurrentDirectory(new java.io.File("."));
-      chooser.setDialogTitle("title");
-      chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-      chooser.setAcceptAllFileFilterUsed(false);
+      int option = JOptionPane.showConfirmDialog(null, "Enter a folder path. \nThe folder must have the same name as a folder in your Google Drive folder.", "Information", JOptionPane.OK_CANCEL_OPTION);
+      
+      if(option == JOptionPane.YES_OPTION) {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new java.io.File("."));
+        chooser.setDialogTitle("title");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
 
-      if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-        local = chooser.getSelectedFile().toString();
+        if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+          local = chooser.getSelectedFile().getAbsolutePath();
+          drive = chooser.getSelectedFile().getName();
+        }
+        else
+          System.exit(1);
       }
-
-      // local = JOptionPane.showInputDialog("Enter a folder path. \nThe folder must have the same name as a folder in your Google Drive folder.");
-
-      String[] temp = local.split("[\\/]");
-      drive = temp[temp.length-1];
+      else
+        System.exit(1);
     }
 
     // Build a new authorized API client service.
@@ -244,7 +247,7 @@ public class DriveCommand {
     ds.addChildren(root);
 
     DriveUpload up = new DriveUpload(service, dir);
-    up.types();
+    DriveUpload.types(up);
 
     java.io.File loc = new java.io.File(local);
     if(!loc.exists()) {
@@ -257,7 +260,8 @@ public class DriveCommand {
     LinkedHashMap<IOFile, String> adding = IOFile.deep(rootIO, ds, up);
 
     // Upload all the local files that were not in Drive
-    for(Map.Entry<IOFile, String> entry : adding.entrySet())
-      DriveUpload.uploadFile(entry.getKey(), entry.getValue());
+    for(Map.Entry<IOFile, String> entry : adding.entrySet()) {
+        DriveUpload.uploadFile(entry.getKey(), entry.getValue());
+    }
   }
 }

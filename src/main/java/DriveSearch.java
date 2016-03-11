@@ -3,6 +3,8 @@ import com.google.api.services.drive.Drive;
 
 import java.io.IOException;
 
+import java.lang.InterruptedException;
+
 import java.util.LinkedList;
 
 public class DriveSearch {
@@ -69,19 +71,29 @@ public class DriveSearch {
   *  @return LinkedList of parents for the last searched file/folder
   *  @throws IOException - If API was unable to gather file/folder information 
   */
-  public static LinkedList<DriveDirectory> addChildren(LinkedList<DriveDirectory> parents) throws IOException {
+public static LinkedList<DriveDirectory> addChildren(LinkedList<DriveDirectory> parents) throws IOException, InterruptedException {
     if(parents.size() == 0)
       return parents;
 
     DriveDirectory parent = parents.removeFirst();
 
     // Search through folder and get all children
-    FileList result = service.files().list()
+    FileList result = null;
+
+    try {
+        result = service.files().list()
             .setQ("'" + parent.getID() + "' in parents and trashed=false")
             .setSpaces("drive")
             .setFields("files(id, name, mimeType)")
             .execute();
-    
+    } catch (IOException e) {
+        LinkedList code = DriveCommand.getErrorCode(e);
+
+        if(code != null)
+            DriveCommand.handleError(code, e);
+        else
+            e.printStackTrace();
+    }
     for(File file : result.getFiles()) {
       DriveDirectory temp = null;
       

@@ -2,6 +2,8 @@ import com.google.api.services.drive.model.*;
 
 import java.io.IOException;
 
+import java.lang.InterruptedException;
+
 import java.util.LinkedList;
 
 public class DriveDirectory {
@@ -59,7 +61,7 @@ public class DriveDirectory {
   *  @param f - Local file and information
   *  @param folder - Boolean specifying if 'f' is a file or folder 
   */
-  public void addDir(File d, IOFile f, Boolean folder) {
+public void addDir(File d, IOFile f, Boolean folder) throws IOException, InterruptedException {
     String[] parents = IOFile.parentFolders(f.getOriginal(), f);
 
     DriveDirectory nw = new DriveDirectory(f.getName(), d.getId(), folder);
@@ -69,8 +71,8 @@ public class DriveDirectory {
   }
 
   /**
-  *  Gets the last parent folder, which will be used to 
-  *  get the id for uploading. Or will be used to update
+  *  Gets the last parent folder, which can be used to 
+  *  get the id for uploading. Or can be used to update
   *  the indexed Drive tree. The method assumes it will 
   *  find all parent folders.
   *

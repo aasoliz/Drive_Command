@@ -99,13 +99,21 @@ public class IOFile {
   *  @throws IOException
   */
   public static LinkedHashMap<IOFile, String> deep(IOFile fi, DriveSearch ds, DriveUpload up) throws IOException {
+    LinkedHashMap<IOFile, String> adding = new LinkedHashMap<IOFile, String>();
+
     // Initial list of directories to search
     File[] initial = fi.getOriginal().listFiles();
     
     for(File file : initial)
       fi.getSubFiles().add(file);
 
-    return deeper(fi, fi.getSubFiles().size(), new LinkedHashMap<IOFile, String>(), ds, up);
+    int size = fi.getSubFiles().size();
+    while(size > 0) {
+      deeper(fi, fi.getSubFiles().removeFirst(), adding, ds, up);
+      size = fi.getSubFiles().size();
+    }
+
+    return adding;
   }
 
   /**
@@ -120,12 +128,12 @@ public class IOFile {
   *  @return  LinkedHashMap of the local files not in Drive
   *  @throws IOException
   */
-  private static LinkedHashMap<IOFile, String> deeper(IOFile fi, int numSize, LinkedHashMap<IOFile, String> adding, DriveSearch ds, DriveUpload up) throws IOException {
-    if(numSize == 0)
-      return adding;
+  private static LinkedHashMap<IOFile, String> deeper(IOFile fi, File temp, LinkedHashMap<IOFile, String> adding, DriveSearch ds, DriveUpload up) throws IOException {
+      //if(numSize == 0)
+      //return adding;
 
-    File temp = fi.getSubFiles().removeFirst();
-    numSize--;
+      //File temp = fi.getSubFiles().removeFirst();
+    //numSize--;
 
     Boolean drive = ds.inDrive(temp.getName(), parentFolders(temp, fi));
 
@@ -141,9 +149,10 @@ public class IOFile {
         fi.getSubFiles().addLast(file);
 
       // Keep track of how many subFolders are left
-      numSize = fi.getSubFiles().size();
+      //numSize = fi.getSubFiles().size();
     }
-
-    return deeper(fi, numSize, adding, ds, up);
+    
+    return adding;
+    //return deeper(fi, numSize, adding, ds, up);
   }
 }
