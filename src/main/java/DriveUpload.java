@@ -21,11 +21,18 @@ public class DriveUpload {
   private static HashMap<String, String> mimeType;
   private static Drive service;
   private static DriveDirectory root;
-  private final InputStream is = Class.getResourceAsStream("mimeTypeMapping.txt");
+  private InputStream is;
 
-  public DriveUpload(Drive serve, DriveDirectory rt) {
+  public DriveUpload(Drive serve, DriveDirectory rt) throws IOException {
     service = serve;
     root = rt;
+
+    is = DriveUpload.class.getClassLoader().getResourceAsStream("mimeTypeMapping.txt");
+
+    if(is == null) {
+      System.out.println("Resource not found");
+      System.exit(3);
+    }
   }
 
   /**

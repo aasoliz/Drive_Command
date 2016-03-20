@@ -252,7 +252,7 @@ public class DriveCommand {
     java.io.File loc = new java.io.File(local);
     if(!loc.exists()) {
       System.out.println("Inputed path was not valid");
-      System.exit(3);
+      System.exit(4);
     }
 
     // Indexes the local folder, checking which files are in Drive
