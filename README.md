@@ -2,7 +2,7 @@
 
 Drive Command is a utility that lets the user upload a specific (on the local system) to Google Drive. It is meant
 to keep Google Drive up to date with the local folder adding any new files that were added locally. It is useful 
-the tree structure of a folder is complex and new files are added at different places in the tree.
+if the tree structure of a folder is complex and new files are added at different places in the tree.
 
 Constraints
 
