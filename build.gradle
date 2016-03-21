@@ -6,6 +6,14 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 version = '1.0'
 
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'DriveCommand'
+    }
+    from { configurations.compile.collect {it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 repositories {
     mavenCentral()
 }

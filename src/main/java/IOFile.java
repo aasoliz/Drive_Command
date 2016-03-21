@@ -129,12 +129,6 @@ public class IOFile {
   *  @throws IOException
   */
   private static LinkedHashMap<IOFile, String> deeper(IOFile fi, File temp, LinkedHashMap<IOFile, String> adding, DriveSearch ds, DriveUpload up) throws IOException {
-      //if(numSize == 0)
-      //return adding;
-
-      //File temp = fi.getSubFiles().removeFirst();
-    //numSize--;
-
     Boolean drive = ds.inDrive(temp.getName(), parentFolders(temp, fi));
 
     // Checks if the folder/file was in Drive folders
@@ -147,12 +141,8 @@ public class IOFile {
 
       for(File file : list)
         fi.getSubFiles().addLast(file);
-
-      // Keep track of how many subFolders are left
-      //numSize = fi.getSubFiles().size();
     }
     
     return adding;
-    //return deeper(fi, numSize, adding, ds, up);
   }
 }

@@ -180,11 +180,15 @@ public class DriveCommand {
     String drive = null;
     String local = null;
 
+    Boolean commandLine = false;
+
     if(args.length == 1) {
       local = args[0];
       
       String[] temp = local.split("[\\/]");
       drive = temp[temp.length-1];
+
+      commandLine = true;
     }
     else {
       int option = JOptionPane.showConfirmDialog(null, "Enter a folder path. \nThe folder must have the same name as a folder in your Google Drive folder.", "Information", JOptionPane.OK_CANCEL_OPTION);
@@ -192,7 +196,7 @@ public class DriveCommand {
       if(option == JOptionPane.YES_OPTION) {
         JFileChooser chooser = new JFileChooser();
         chooser.setCurrentDirectory(new java.io.File("."));
-        chooser.setDialogTitle("title");
+        chooser.setDialogTitle("");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setAcceptAllFileFilterUsed(false);
 
@@ -232,7 +236,12 @@ public class DriveCommand {
     if(result.getFiles().size() > 0)
       file = result.getFiles().get(0);
     else {
-      System.out.println(drive + " was not found in Drive");
+
+      if(commandLine)
+        System.out.println(drive + " was not found in Drive");
+      else 
+        JOptionPane.showMessageDialog(null, drive + " was not found in Drive", "Information", JOptionPane.OK_OPTION);
+
       System.exit(2);
     }
 
@@ -246,13 +255,18 @@ public class DriveCommand {
     DriveSearch ds = new DriveSearch(service, dir);
     ds.addChildren(root);
 
-    DriveUpload up = new DriveUpload(service, dir);
+    DriveUpload up = new DriveUpload(service, dir, commandLine);
     DriveUpload.types(up);
 
     java.io.File loc = new java.io.File(local);
     if(!loc.exists()) {
-      System.out.println("Inputed path was not valid");
-      System.exit(4);
+
+      if(commandLine)
+        System.out.println("Inputed path was not valid");
+      else
+        JOptionPane.showMessageDialog(null, "Inputed path was not valid", "Information", JOptionPane.OK_OPTION);
+
+      System.exit(3);
     }
 
     // Indexes the local folder, checking which files are in Drive

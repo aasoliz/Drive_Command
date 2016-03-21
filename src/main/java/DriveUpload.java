@@ -17,21 +17,25 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import javax.swing.JOptionPane;
+
 public class DriveUpload {
   private static HashMap<String, String> mimeType;
   private static Drive service;
   private static DriveDirectory root;
   private InputStream is;
 
-  public DriveUpload(Drive serve, DriveDirectory rt) throws IOException {
+  public DriveUpload(Drive serve, DriveDirectory rt, Boolean commandLine) throws IOException {
     service = serve;
     root = rt;
 
     is = DriveUpload.class.getClassLoader().getResourceAsStream("mimeTypeMapping.txt");
 
     if(is == null) {
-      System.out.println("Resource not found");
-      System.exit(3);
+      if(commandLine)
+        System.out.println("Resource was not found");
+      else
+        JOptionPane.showMessageDialog(null, "Resource was not found", "Information", JOptionPane.OK_OPTION);
     }
   }
 
@@ -43,6 +47,11 @@ public class DriveUpload {
   *  @throws IOException - If the file was not found or could not be read
   */
   public static Boolean types(DriveUpload up) throws IOException {
+    if(up.is == null) {
+      mimeType = null;
+      return false;
+    }
+
     mimeType = new HashMap<String, String>();
     try(BufferedReader reader = new BufferedReader(new InputStreamReader(up.is))) {
       String curr;
@@ -71,9 +80,10 @@ public class DriveUpload {
   *  @throws IOException
   */
   public static String fileType(Path path) throws IOException {
-    // TODO: Need to change to Google's mimeType?
+    // Convert to Google extension is possible
     String ext = java.nio.file.Files.probeContentType(path);
-    String test = mimeType.get(ext);
+
+    String test = (mimeType == null) ? null : mimeType.get(ext);
 
     if(test == null)
       return ext;
