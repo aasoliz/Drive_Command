@@ -129,13 +129,17 @@ public class IOFile {
   *  @throws IOException
   */
   private static LinkedHashMap<IOFile, String> deeper(IOFile fi, File temp, LinkedHashMap<IOFile, String> adding, DriveSearch ds, DriveUpload up) throws IOException {
-    Boolean drive = ds.inDrive(temp.getName(), parentFolders(temp, fi));
+    DriveDirectory drive = ds.inDrive(temp.getName(), parentFolders(temp, fi));
 
     // Checks if the folder/file was in Drive folders
-    if(!drive) {
-      if(temp.getName().charAt(0) != '.' && temp.getName().charAt(0) != '#')
+    if(drive == null) {
+      if(temp.getName().charAt(0) != '.' && 
+         temp.getName().charAt(0) != '#' &&
+         temp.getName().charAt(temp.getName().length() - 1) != '~'
+         )
         adding.put(new IOFile(temp, fi.getOriginalFolder(), fi), up.fileType(temp.toPath()));
     }
+    else if(drive.getName().
     if(temp.isDirectory()) {
       File[] list = temp.listFiles();
 

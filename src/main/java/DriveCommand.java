@@ -274,8 +274,9 @@ public class DriveCommand {
     LinkedHashMap<IOFile, String> adding = IOFile.deep(rootIO, ds, up);
 
     // Upload all the local files that were not in Drive
-    for(Map.Entry<IOFile, String> entry : adding.entrySet()) {
-        DriveUpload.uploadFile(entry.getKey(), entry.getValue());
-    }
+        for(Map.Entry<IOFile, String> entry : adding.entrySet()) {
+          System.out.println(entry.getKey().getName() + " " + entry.getValue());
+    //  DriveUpload.uploadFile(entry.getKey(), entry.getValue(), ds);
+     }
   }
 }

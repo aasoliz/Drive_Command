@@ -100,7 +100,7 @@ public class DriveUpload {
   *  @param mimeType - Type of file that is to be uploaded
   *  @throws IOException - If upload was unsuccessful
   */
-public static void uploadFile(IOFile file, String mimeType) throws IOException, InterruptedException {
+  public static void uploadFile(IOFile file, String mimeType, DriveSearch ds) throws IOException, InterruptedException {
     // TODO: Multipart upload?
 
     System.out.println("Files : " + file.getName());
@@ -110,7 +110,7 @@ public static void uploadFile(IOFile file, String mimeType) throws IOException, 
     meta.setMimeType(mimeType);
 
     // Get the id of the parent folder in drive
-    String parentId = root.getDriveParent(IOFile.parentFolders(file.getOriginal(), file)).getID();
+    String parentId = ds.inDrive(file.getName(), IOFile.parentFolders(file.getOriginal(), file)).getID();
     meta.setParents(Collections.singletonList(parentId));
       
     meta.setWritersCanShare(true);
@@ -128,7 +128,7 @@ public static void uploadFile(IOFile file, String mimeType) throws IOException, 
                .execute();
 
           // Add newly created drive folder to the Drive directory
-          root.addDir(nw, file, false);
+          root.addDir(file, false, nw.getId(), ds);
         }
         else {
           File nw = service.files().create(meta)
@@ -136,7 +136,7 @@ public static void uploadFile(IOFile file, String mimeType) throws IOException, 
              .execute();
         
           // Add newly created drive folder to the Drive directory
-          root.addDir(nw, file, true);
+          root.addDir(file, true, nw.getId(), ds);
         }
       } catch (IOException e) {
         LinkedList code = DriveCommand.getErrorCode(e);
@@ -147,5 +147,5 @@ public static void uploadFile(IOFile file, String mimeType) throws IOException, 
           e.printStackTrace();
       }
 
-  }
+      }
 }

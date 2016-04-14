@@ -20,46 +20,29 @@ public class DriveSearch {
   *  Attempts to find a given local file with a list of parents in
   *  Google Drive.
   *
-  *  @param find - Filename to find
-  *  @param parents - Parent folders of the file 'find'
-  *  @return Whether the file was found
+  *  @param find       - Filename to find
+  *  @param parents    - Parent folders of the file 'find'
+  *  @return The file that was found
   */
-  public Boolean inDrive(String find, String[] parents) {
-    Boolean found = false;
+  public DriveDirectory inDrive(String find, String[] parents) {
+    return inDr(find, parents, 0, null);
+  }
 
-    LinkedList<DriveDirectory> children = root.getChildren();
+  private DriveDirectory inDr(String find, String[] parents, int k, DriveDirectory rt) {
     DriveDirectory temp = null;
 
-    int k = 0;
-    while(!found) {
-      if(children != null && k < parents.length + 1) {
-        for(DriveDirectory child : children) {
-          // Parent folder was found
-          if(k < parents.length && child.getName().equals(parents[k])) {
-            temp = child;
-            break;
-          }
-          // Child was found in the last parent folder
-          else if(child.getName().equals(find))
-            return true;
-        }
-      }
-      else
-        return false;
+    DriveDirectory[] children = null;
+    children = (rt == null) ? root.getChildren() : rt.getChildren();
 
-      // If parent folder found, gets its children
-      //  and searches for the next parent folder
-      //  or file on the next iteration
-      if(temp != null) {
-        k++;
-        children = temp.getChildren();
-        temp = null;
-      }
-      else 
-        return false;
+    for(int i = 0; i < children.length; i++) {
+      if(children[i].getName().equals(find) && k == parents.length)
+        return children[i];
+
+      else if(k < parents.length && children[i].getName().equals(parents[k]))
+        return inDr(find, parents, ++k, children[i]);
     }
 
-    return false;
+    return null;
   }
 
   /**
@@ -94,6 +77,10 @@ public static LinkedList<DriveDirectory> addChildren(LinkedList<DriveDirectory> 
         else
             e.printStackTrace();
     }
+
+    parent.children = new DriveDirectory[result.getFiles().size()];
+
+    int i = 0;
     for(File file : result.getFiles()) {
       DriveDirectory temp = null;
       
@@ -101,13 +88,13 @@ public static LinkedList<DriveDirectory> addChildren(LinkedList<DriveDirectory> 
       if(file.getMimeType().equals("application/vnd.google-apps.folder")) {
         temp = new DriveDirectory(file.getName(), file.getId(), true);
 
-        DriveDirectory.addChild(parent, temp);
+        DriveDirectory.addSubFolder(parent, temp);
         parents.addLast(temp);
       }
+      else
+        temp = new DriveDirectory(file.getName(), file.getId(), false);
       
-      temp = new DriveDirectory(file.getName(), file.getId(), false);
-
-      DriveDirectory.addChild(parent, temp);
+      parent.children[i++] = temp;
     }
 
     return addChildren(parents);
