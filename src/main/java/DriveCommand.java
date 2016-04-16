@@ -229,7 +229,7 @@ public class DriveCommand {
     FileList result = service.files().list()
             .setQ("mimeType='application/vnd.google-apps.folder' and name='" + drive + "' and trashed=false")
             .setSpaces("drive")
-            .setFields("files(id, name, parents)")
+            .setFields("files(id, name, parents, modifiedTime)")
             .execute();
 
     File file = null;
@@ -247,7 +247,7 @@ public class DriveCommand {
 
     // Initializes a structure that will hold what files are in
     //  the given drive folder
-    DriveDirectory dir = new DriveDirectory(file.getName(), file.getId(), true);
+    DriveDirectory dir = new DriveDirectory(file.getName(), file.getId(), file.getModifiedTime(), true);
     LinkedList<DriveDirectory> root = new LinkedList<DriveDirectory>();
     root.add(dir);
 

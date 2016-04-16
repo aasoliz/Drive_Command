@@ -67,7 +67,7 @@ public static LinkedList<DriveDirectory> addChildren(LinkedList<DriveDirectory> 
         result = service.files().list()
             .setQ("'" + parent.getID() + "' in parents and trashed=false")
             .setSpaces("drive")
-            .setFields("files(id, name, mimeType)")
+            .setFields("files(id, name, mimeType, modifiedTime)")
             .execute();
     } catch (IOException e) {
         LinkedList code = DriveCommand.getErrorCode(e);
@@ -86,13 +86,13 @@ public static LinkedList<DriveDirectory> addChildren(LinkedList<DriveDirectory> 
       
       // Only search folders
       if(file.getMimeType().equals("application/vnd.google-apps.folder")) {
-        temp = new DriveDirectory(file.getName(), file.getId(), true);
+        temp = new DriveDirectory(file.getName(), file.getId(), file.getModifiedTime(), true);
 
         DriveDirectory.addSubFolder(parent, temp);
         parents.addLast(temp);
       }
       else
-        temp = new DriveDirectory(file.getName(), file.getId(), false);
+        temp = new DriveDirectory(file.getName(), file.getId(), file.getModifiedTime(), false);
       
       parent.children[i++] = temp;
     }

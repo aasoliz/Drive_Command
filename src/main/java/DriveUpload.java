@@ -128,7 +128,7 @@ public class DriveUpload {
                .execute();
 
           // Add newly created drive folder to the Drive directory
-          root.addDir(file, false, nw.getId(), ds);
+          root.addDir(file, false, nw.getId(), System.currentTimeMillis(), ds);
         }
         else {
           File nw = service.files().create(meta)
@@ -136,7 +136,7 @@ public class DriveUpload {
              .execute();
         
           // Add newly created drive folder to the Drive directory
-          root.addDir(file, true, nw.getId(), ds);
+          root.addDir(file, true, nw.getId(), System.currentTimeMillis(), ds);
         }
       } catch (IOException e) {
         LinkedList code = DriveCommand.getErrorCode(e);
