@@ -9,7 +9,8 @@ public class IOFile {
   private File original;
   private String name;
   private File parent;
-  private long modifiedTime;
+  private Boolean modifiedTime;
+  private String fileId;
   private Boolean isDirectory;
   private LinkedList<File> subFiles = new LinkedList<File>();
 
@@ -18,7 +19,8 @@ public class IOFile {
     original = root;
     name = original.getName();
     parent = null;
-    modifiedTime = original.lastModified();
+    modifiedTime = false;
+    fileId = "";
     isDirectory = original.isDirectory();
   }
 
@@ -27,7 +29,18 @@ public class IOFile {
     original = root;
     name = original.getName();
     parent = par.getOriginal();
-    modifiedTime = original.lastModified();
+    modifiedTime = false;
+    fileId = "";
+    isDirectory = original.isDirectory();
+  }
+
+  public IOFile(File root, String top, IOFile par, String fileID) {
+    originalFolder = top;
+    original = root;
+    name = original.getName();
+    parent = par.getOriginal();
+    modifiedTime = true;
+    fileId = fileID;
     isDirectory = original.isDirectory();
   }
 
@@ -52,8 +65,12 @@ public class IOFile {
   }
 
   /** Last modified time */
-  public long getModifiedTime() {
+  public Boolean getModifiedTime() {
     return this.modifiedTime;
+  }
+
+  public String getFileID() {
+    return this.fileId;
   }
 
   /** Is the IOFile a folder or file @return Whether the local file is a folder or file */
@@ -148,7 +165,7 @@ public class IOFile {
         adding.put(new IOFile(temp, fi.getOriginalFolder(), fi), up.fileType(temp.toPath()));
     }
     else if((drive.getModTime() < temp.lastModified()) && !temp.isDirectory()) {
-      adding.put(new IOFile(temp, fi.getOriginalFolder(), fi), up.fileType(temp.toPath()));
+      adding.put(new IOFile(temp, fi.getOriginalFolder(), fi, drive.getID()), up.fileType(temp.toPath()));
     }
     if(temp.isDirectory()) {
       File[] list = temp.listFiles();

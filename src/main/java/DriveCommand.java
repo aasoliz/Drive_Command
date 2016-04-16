@@ -13,13 +13,18 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.*;
 import com.google.api.services.drive.Drive;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.stream.JsonReader;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.PrintWriter;
 
@@ -122,14 +127,23 @@ public class DriveCommand {
   *  @param e - Exception that was thrown
   *  @return LinkedList with the error code and message
   */
-  public static LinkedList getErrorCode(Exception e) {
-    JsonObject o = new JsonParser()
-              .parse(e.toString())
-              .getAsJsonObject();
+  public static LinkedList getErrorCode(Exception e) throws IOException {
+    System.out.println(e.toString());
+    JsonReader reader = new JsonReader(new StringReader(e.toString()));
+    reader.setLenient(true);
+    System.out.println(reader.nextString().toString());
+    System.out.println(reader.nextString().toString());
+    System.out.println(reader.nextString().toString());
+
+    JsonObject o = new JsonParser().parse(reader).getAsJsonObject();
 
     LinkedList error = new LinkedList();
-    error.add(o.get("code").getAsInt());
-    error.add(o.get("message").getAsString());
+    String code = o.getAsJsonPrimitive("code").getAsString();
+    System.out.println(error.add(code) + " " + code);
+    System.out.println(error.add(o.getAsString()));
+
+    for(Object p : error)
+      System.out.println("json " + p.toString());
 
     return error;
   }
@@ -275,8 +289,8 @@ public class DriveCommand {
 
     // Upload all the local files that were not in Drive
         for(Map.Entry<IOFile, String> entry : adding.entrySet()) {
-          System.out.println(entry.getKey().getName() + " " + entry.getValue());
-    //  DriveUpload.uploadFile(entry.getKey(), entry.getValue(), ds);
+          //System.out.println(entry.getKey().getName() + " " + entry.getValue());
+          DriveUpload.uploadFile(entry.getKey(), entry.getValue(), ds);
      }
   }
 }

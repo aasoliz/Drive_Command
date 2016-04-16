@@ -9,3 +9,14 @@
   } ],
   "message" : "File not found: TEst."
 }
+
+com.google.api.client.googleapis.json.GoogleJsonResponseException: 403 Forbidden
+{
+  "code" : 403,
+  "errors" : [ {
+    "domain" : "global",
+    "message" : "The specified parent is not a folder.",
+    "reason" : "parentNotAFolder"
+  } ],
+  "message" : "The specified parent is not a folder."
+}

@@ -116,36 +116,43 @@ public class DriveUpload {
     meta.setWritersCanShare(true);
     meta.setViewersCanCopyContent(true);
 
-      try {
-        // Upload a file
-        if(!mimeType.equals("application/vnd.google-apps.folder")) {
-          
-          // Actual content of the file
-          FileContent mediaContent = new FileContent(mimeType, file.getOriginal());
-          
-          File nw = service.files().create(meta, mediaContent)
-               .setFields("id")
-               .execute();
+    // Actual content of the file
+    FileContent mediaContent = new FileContent(mimeType, file.getOriginal());
 
-          // Add newly created drive folder to the Drive directory
-          root.addDir(file, false, nw.getId(), System.currentTimeMillis(), ds);
-        }
-        else {
-          File nw = service.files().create(meta)
-             .setFields("id")
-             .execute();
-        
+    try {
+      // Upload a file
+      if(!mimeType.equals("application/vnd.google-apps.folder")) {
+                
+        File nw = service.files().create(meta, mediaContent)
+          .setFields("id")
+          .execute();
+
+        // Add newly created drive folder to the Drive directory
+        root.addDir(file, false, nw.getId(), System.currentTimeMillis(), ds);
+      }
+      else {
+        if(!file.getModifiedTime()) {
+          File nw = service.files().create(meta, mediaContent)
+            .setFields("id")
+            .execute();
+            
           // Add newly created drive folder to the Drive directory
           root.addDir(file, true, nw.getId(), System.currentTimeMillis(), ds);
         }
-      } catch (IOException e) {
-        LinkedList code = DriveCommand.getErrorCode(e);
+        else {
+          File nw = service.files().update(file.getFileID(), meta, mediaContent)
+            .execute();
 
-        if(code != null)
-          DriveCommand.handleError(code, e);
-        else
-          e.printStackTrace();
+          // TODO: Need to update file in DriveDirectory
+        }        
       }
+    } catch (IOException e) {
+      LinkedList code = DriveCommand.getErrorCode(e);
 
-      }
+      if(code != null)
+        DriveCommand.handleError(code, e);
+      else
+        e.printStackTrace();
+    }
+  }
 }
