@@ -65,7 +65,7 @@ public class IOFile {
   }
 
   /** Last modified time */
-  public Boolean getModifiedTime() {
+  public Boolean getModified() {
     return this.modifiedTime;
   }
 
@@ -154,7 +154,7 @@ public class IOFile {
   *  @throws IOException
   */
   private static LinkedHashMap<IOFile, String> deeper(IOFile fi, File temp, LinkedHashMap<IOFile, String> adding, DriveSearch ds, DriveUpload up) throws IOException {
-    DriveDirectory drive = ds.inDrive(temp.getName(), parentFolders(temp, fi));
+    DriveDirectory drive = ds.inDrive(temp.getName(), parentFolders(temp, fi), false);
 
     // Checks if the folder/file was in Drive folders
     if(drive == null) {
@@ -164,7 +164,7 @@ public class IOFile {
          )
         adding.put(new IOFile(temp, fi.getOriginalFolder(), fi), up.fileType(temp.toPath()));
     }
-    else if((drive.getModTime() < temp.lastModified()) && !temp.isDirectory()) {
+    else if((!temp.isDirectory() && drive.getModTime() < temp.lastModified())) {
       adding.put(new IOFile(temp, fi.getOriginalFolder(), fi, drive.getID()), up.fileType(temp.toPath()));
     }
     if(temp.isDirectory()) {

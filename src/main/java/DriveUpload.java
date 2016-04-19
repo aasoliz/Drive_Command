@@ -110,8 +110,9 @@ public class DriveUpload {
     meta.setMimeType(mimeType);
 
     // Get the id of the parent folder in drive
-    String parentId = ds.inDrive(file.getName(), IOFile.parentFolders(file.getOriginal(), file)).getID();
-    meta.setParents(Collections.singletonList(parentId));
+    DriveDirectory parentId = ds.inDrive(file.getName(), IOFile.parentFolders(file.getOriginal(), file), true);
+    System.out.println(parentId == null);
+    meta.setParents(Collections.singletonList(parentId.getID()));
       
     meta.setWritersCanShare(true);
     meta.setViewersCanCopyContent(true);
@@ -131,7 +132,7 @@ public class DriveUpload {
         root.addDir(file, false, nw.getId(), System.currentTimeMillis(), ds);
       }
       else {
-        if(!file.getModifiedTime()) {
+        if(!file.getModified()) {
           File nw = service.files().create(meta, mediaContent)
             .setFields("id")
             .execute();

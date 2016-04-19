@@ -74,7 +74,7 @@ public class DriveDirectory {
     String[] parents = IOFile.parentFolders(f.getOriginal(), f);
 
     DriveDirectory nw = new DriveDirectory(f.getName(), pID, modTime, folder);
-    DriveDirectory parent = ds.inDrive(f.getName(), parents);
+    DriveDirectory parent = ds.inDrive(f.getName(), parents, true);
 
     addSubFolder(parent, nw);
   }
