@@ -30,7 +30,10 @@ import java.io.PrintWriter;
 
 import java.lang.InterruptedException;
 
+import java.sql.Timestamp;
+
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.LinkedList;
@@ -128,22 +131,25 @@ public class DriveCommand {
   *  @return LinkedList with the error code and message
   */
   public static LinkedList getErrorCode(Exception e) throws IOException {
-    System.out.println(e.toString());
-    JsonReader reader = new JsonReader(new StringReader(e.toString()));
+    JsonReader reader = new JsonReader(new StringReader(e.getMessage()));
     reader.setLenient(true);
-    System.out.println(reader.nextString().toString());
-    System.out.println(reader.nextString().toString());
-    System.out.println(reader.nextString().toString());
+
+    // Go past header
+    reader.nextString();
+    reader.nextString();
 
     JsonObject o = new JsonParser().parse(reader).getAsJsonObject();
 
     LinkedList error = new LinkedList();
-    String code = o.getAsJsonPrimitive("code").getAsString();
-    System.out.println(error.add(code) + " " + code);
-    System.out.println(error.add(o.getAsString()));
+    error.add(o.getAsJsonPrimitive("code").getAsInt());
+    error.add(o.getAsJsonPrimitive("message").getAsString());
 
-    for(Object p : error)
-      System.out.println("json " + p.toString());
+    // Convert stacktrace to String
+    StringWriter sw = new StringWriter();
+    e.printStackTrace(new PrintWriter(sw));
+
+    String[] stack = sw.toString().split("}");
+    error.add(stack[stack.length-1]);
 
     return error;
   }
@@ -156,34 +162,35 @@ public class DriveCommand {
   *  @throws IOException - If the file was not found or created
   */
   public static void handleError(LinkedList error, Exception e) throws IOException, InterruptedException {
-    FileWriter writer = new FileWriter(new java.io.File("log"));
+    PrintWriter writer = new PrintWriter(new FileWriter(new java.io.File("log"), true));
 
     Integer code = (Integer) error.removeFirst();
     String msg = (String) error.removeFirst();
-
-    // Convert stacktrace to String
-    StringWriter sw = new StringWriter();
-    e.printStackTrace(new PrintWriter(sw));
-
+    String stck = (String) error.removeFirst();
+    
+    // Time error occured
+    writer.println((new Timestamp(Calendar.getInstance().getTime().getTime())));
+   
     // TODO: Take actions to resolve errors
     switch(code) {
         case 403:
-          writer.write("code: " + code + " " + msg + "\n");
-          writer.write(sw.toString());
-          writer.write("\n");
+          writer.println("code: " + code + "\nmessage: " + msg + "\nstack trace:");
+          writer.println(stck);
           Thread.sleep(1000);
+          break;
         case 400:
         case 401:
         case 404:
         case 500:
-          writer.write("code: " + code + " " + msg + "\n");
-          writer.write(sw.toString());
-          writer.write("\n");
+          writer.println("code: " + code + "\nmessage: " + msg + "\nstack trace:");
+          writer.println(stck);
           break;
         default:
-          writer.write(sw.toString());
+          writer.println("code: " + code + "\nmessage: " + msg + "\nstack trace:");
+          writer.println(stck);
     }
 
+    writer.flush();
     writer.close();
   }
 
