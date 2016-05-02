@@ -110,6 +110,10 @@ public class IOFile {
       fin_path[j] = paths[i];
       j++;
     } 
+    
+    for(int i = 0; i < fin_path.length; i++) {
+      System.out.println(fin_path[i] + "/");
+    }
 
     return fin_path;
   }
@@ -154,7 +158,7 @@ public class IOFile {
   *  @throws IOException
   */
   private static LinkedHashMap<IOFile, String> deeper(IOFile fi, File temp, LinkedHashMap<IOFile, String> adding, DriveSearch ds, DriveUpload up) throws IOException {
-    DriveDirectory drive = ds.inDrive(temp.getName(), parentFolders(temp, fi), false);
+    DriveDirectory drive = ds.inDrive(temp.getName(), parentFolders(temp, fi), false, false);
 
     // Checks if the folder/file was in Drive folders
     if(drive == null) {

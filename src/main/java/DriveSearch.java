@@ -24,33 +24,32 @@ public class DriveSearch {
   *  @param parents    - Parent folders of the file 'find'
   *  @return The file that was found
   */
-  public DriveDirectory inDrive(String find, String[] parents, Boolean folder) {
-    return inDr(find, parents, 0, null, folder);
+  public DriveDirectory inDrive(String find, String[] parents, Boolean folder, Boolean parent) {
+    return inDr(find, parents, 0, null, folder, parent);
   }
 
-  private DriveDirectory inDr(String find, String[] parents, int k, DriveDirectory rt, Boolean folder) {
+  private DriveDirectory inDr(String find, String[] parents, int k, DriveDirectory rt, Boolean folder, Boolean parent) {
     DriveDirectory temp = null;
 
     DriveDirectory[] children = null;
-    children = (rt == null) ? root.getChildren() : rt.getChildren();
+    rt = (rt == null) ? root : rt;
+    children = rt.getChildren();
 
     for(int i = 0; i < children.length; i++) {
       if(children[i].getName().equals(find) && k == parents.length) {
-        System.out.println("hey " + folder);
-        if(folder) {
-          System.out.println("rt " + rt.getName());
+        if(folder)
           return rt;
-        }
 
-        System.out.println("child " + children[i].getName());
         return children[i];
       }
 
       else if(k < parents.length && children[i].getName().equals(parents[k])) 
-        return inDr(find, parents, ++k, children[i], folder);
+        return inDr(find, parents, ++k, children[i], folder, parent);
     }
 
-    System.out.println("no hey");
+    if(k == parents.length && parent)
+      return rt;
+
     return null;
   }
 

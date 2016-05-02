@@ -4,7 +4,7 @@ apply plugin: 'application'
 mainClassName = 'DriveCommand'
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
-version = '1.0'
+version = '2.0'
 
 task fatJar(type: Jar) {
     manifest {
@@ -19,10 +19,20 @@ repositories {
 }
 
 dependencies {
-    compile 'com.google.api-client:google-api-client:1.20.0'
-    compile 'com.google.oauth-client:google-oauth-client-jetty:1.20.0'
-    compile 'com.google.apis:google-api-services-drive:v3-rev6-1.20.0'
+    compile 'com.google.oauth-client:google-oauth-client-jetty:1.21.0'
     compile 'com.google.code.gson:gson:2.6.1'
+    compile('com.google.api-client:google-api-client:1.21.0') {
+        exclude group: 'org.apache.httpcomponents'
+        exclude module: 'google-api-client'
+    }
+    compile('com.google.apis:google-api-services-drive:v3-rev18-1.21.0') {
+        exclude group: 'org.apache.httpcomponents'
+        exclude module: 'google-api-client'
+    }
+    compile('com.google.http-client:google-http-client-jackson2:1.21.0') {
+        exclude group: 'org.apache.httpcomponents'
+    }
+    compile files('libs/google-api-client-1.22.0-SNAPSHOT.jar')
 }
 
 run {

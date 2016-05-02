@@ -50,10 +50,10 @@ public class DriveDirectory {
   public LinkedList<DriveDirectory> getSubFolders() { return this.subFolders; }
 
   /**
-  *  Creates a parent to child relationship.
+  *  Creates a parent to child folder relationship.
   *  
   *  @param parent Parent folder in Drive
-  *  @param subFolder  Child folder/file contained in parent
+  *  @param subFolder  Child folder contained in parent
   */
   public static void addSubFolder(DriveDirectory parent, DriveDirectory subFolder) {
     if(parent.subFolders == null)
@@ -70,11 +70,10 @@ public class DriveDirectory {
   *  @param f - Local file and information
   *  @param folder - Boolean specifying if 'f' is a file or folder 
   */
-  public void addDir(IOFile f, Boolean folder, String pID, long modTime, DriveSearch ds) {
+  public void addDir(IOFile f, Boolean folder, String pID, long modTime, DriveDirectory parent) {
     String[] parents = IOFile.parentFolders(f.getOriginal(), f);
 
     DriveDirectory nw = new DriveDirectory(f.getName(), pID, modTime, folder);
-    DriveDirectory parent = ds.inDrive(f.getName(), parents, true);
 
     addSubFolder(parent, nw);
   }

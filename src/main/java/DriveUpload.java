@@ -108,43 +108,47 @@ public class DriveUpload {
     File meta = new File();
     meta.setName(file.getName());
     meta.setMimeType(mimeType);
-
-    // Get the id of the parent folder in drive
-    DriveDirectory parentId = ds.inDrive(file.getName(), IOFile.parentFolders(file.getOriginal(), file), true);
-    System.out.println(parentId == null);
-    meta.setParents(Collections.singletonList(parentId.getID()));
-      
     meta.setWritersCanShare(true);
     meta.setViewersCanCopyContent(true);
-
+    
     // Actual content of the file
     FileContent mediaContent = new FileContent(mimeType, file.getOriginal());
 
     try {
+
       // Upload a file
-      if(!mimeType.equals("application/vnd.google-apps.folder")) {
+      if(mimeType.equals("application/vnd.google-apps.folder")) {
+
+        // Get the id of the parent folder in drive
+        DriveDirectory parentId = ds.inDrive(file.getName(), IOFile.parentFolders(file.getOriginal(), file), true, true);
+        meta.setParents(Collections.singletonList(parentId.getID()));
                 
-        File nw = service.files().create(meta, mediaContent)
+        File nw = service.files().create(meta)
           .setFields("id")
           .execute();
 
         // Add newly created drive folder to the Drive directory
-        root.addDir(file, false, nw.getId(), System.currentTimeMillis(), ds);
+        root.addDir(file, false, nw.getId(), System.currentTimeMillis(), parentId);
       }
       else {
         if(!file.getModified()) {
+
+          // Get the id of the parent folder in drive
+          DriveDirectory parentId = ds.inDrive(file.getName(), IOFile.parentFolders(file.getOriginal(), file), true, true);
+          meta.setParents(Collections.singletonList(parentId.getID()));
+
           File nw = service.files().create(meta, mediaContent)
             .setFields("id")
             .execute();
             
           // Add newly created drive folder to the Drive directory
-          root.addDir(file, true, nw.getId(), System.currentTimeMillis(), ds);
+          root.addDir(file, true, nw.getId(), System.currentTimeMillis(), parentId);
         }
         else {
           File nw = service.files().update(file.getFileID(), meta, mediaContent)
             .execute();
 
-          // TODO: Need to update file in DriveDirectory
+          // TODO: Need to update file in DriveDirectory ?
         }        
       }
     } catch (IOException e) {
@@ -152,8 +156,10 @@ public class DriveUpload {
 
       if(code != null)
         DriveCommand.handleError(code, e);
-      else
+      else {
+        System.out.println(e.getMessage());
         e.printStackTrace();
+      }
     }
   }
 }

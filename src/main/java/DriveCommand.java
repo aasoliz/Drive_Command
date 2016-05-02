@@ -5,16 +5,14 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 
+import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.*;
-import com.google.api.services.drive.Drive;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
@@ -42,15 +40,9 @@ import java.util.Map;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-// import org.json.simple.JSONArray;
-// import org.json.simple.JSONObject;
-// import org.json.simple.parser.JSONParser;
-// import org.json.simple.parser.ParseException;
-
 public class DriveCommand {
   /** Application name. */
-  private static final String APPLICATION_NAME =
-    "Drive Command";
+  private static final String APPLICATION_NAME = "Drive Command";
 
   /** Directory to store user credentials for this application. */
   private static final java.io.File DATA_STORE_DIR = new java.io.File(
@@ -295,9 +287,7 @@ public class DriveCommand {
     LinkedHashMap<IOFile, String> adding = IOFile.deep(rootIO, ds, up);
 
     // Upload all the local files that were not in Drive
-        for(Map.Entry<IOFile, String> entry : adding.entrySet()) {
-          //System.out.println(entry.getKey().getName() + " " + entry.getKey().getModified() + " " + entry.getValue());
-          DriveUpload.uploadFile(entry.getKey(), entry.getValue(), ds);
-     }
+    for(Map.Entry<IOFile, String> entry : adding.entrySet())
+      DriveUpload.uploadFile(entry.getKey(), entry.getValue(), ds);
   }
 }
