@@ -100,7 +100,9 @@ public class DriveUpload {
   *  @param mimeType - Type of file that is to be uploaded
   *  @throws IOException - If upload was unsuccessful
   */
-  public static void uploadFile(IOFile file, String mimeType, DriveSearch ds) throws IOException, InterruptedException {
+  public static void uploadFile(IOFile file, String mimeType, DriveSearch ds) 
+    throws IOException, InterruptedException {
+
     // TODO: Multipart upload?
 
     System.out.println("Files : " + file.getName());

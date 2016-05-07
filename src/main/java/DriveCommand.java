@@ -204,7 +204,8 @@ public class DriveCommand {
       commandLine = true;
     }
     else {
-      int option = JOptionPane.showConfirmDialog(null, "Enter a folder path. \nThe folder must have the same name as a folder in your Google Drive folder.", "Information", JOptionPane.OK_CANCEL_OPTION);
+      int option = JOptionPane.showConfirmDialog(null, "Enter a folder path. \nThe folder must have the same name as a folder in your Google Drive folder.", 
+                                                 "Information", JOptionPane.OK_CANCEL_OPTION);
       
       if(option == JOptionPane.YES_OPTION) {
         JFileChooser chooser = new JFileChooser();

@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import java.lang.InterruptedException;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class DriveSearch {
@@ -24,27 +25,32 @@ public class DriveSearch {
   *  @param parents    - Parent folders of the file 'find'
   *  @return The file that was found
   */
-  public DriveDirectory inDrive(String find, String[] parents, Boolean folder, Boolean parent) {
+  public DriveDirectory inDrive(String find, String[] parents, 
+                                Boolean folder, Boolean parent) {
     return inDr(find, parents, 0, null, folder, parent);
   }
 
-  private DriveDirectory inDr(String find, String[] parents, int k, DriveDirectory rt, Boolean folder, Boolean parent) {
+  private DriveDirectory inDr(String find, String[] parents, int k, 
+                              DriveDirectory rt, Boolean folder, Boolean parent) {
+
     DriveDirectory temp = null;
 
-    DriveDirectory[] children = null;
+    ArrayList<DriveDirectory> children = null;
+
     rt = (rt == null) ? root : rt;
     children = rt.getChildren();
 
-    for(int i = 0; i < children.length; i++) {
-      if(children[i].getName().equals(find) && k == parents.length) {
+    int stop = (children == null) ? 0 : children.size();
+    for(int i = 0; i < stop; i++) {
+      if(children.get(i).getName().equals(find) && k == parents.length) {
         if(folder)
           return rt;
 
-        return children[i];
+        return children.get(i);
       }
 
-      else if(k < parents.length && children[i].getName().equals(parents[k])) 
-        return inDr(find, parents, ++k, children[i], folder, parent);
+      else if(k < parents.length && children.get(i).getName().equals(parents[k])) 
+        return inDr(find, parents, ++k, children.get(i), folder, parent);
     }
 
     if(k == parents.length && parent)
@@ -62,7 +68,9 @@ public class DriveSearch {
   *  @return LinkedList of parents for the last searched file/folder
   *  @throws IOException - If API was unable to gather file/folder information 
   */
-public static LinkedList<DriveDirectory> addChildren(LinkedList<DriveDirectory> parents) throws IOException, InterruptedException {
+public static LinkedList<DriveDirectory> addChildren(LinkedList<DriveDirectory> parents) 
+  throws IOException, InterruptedException {
+
     if(parents.size() == 0)
       return parents;
 
@@ -86,9 +94,6 @@ public static LinkedList<DriveDirectory> addChildren(LinkedList<DriveDirectory> 
             e.printStackTrace();
     }
 
-    parent.children = new DriveDirectory[result.getFiles().size()];
-
-    int i = 0;
     for(File file : result.getFiles()) {
       DriveDirectory temp = null;
       
@@ -96,13 +101,12 @@ public static LinkedList<DriveDirectory> addChildren(LinkedList<DriveDirectory> 
       if(file.getMimeType().equals("application/vnd.google-apps.folder")) {
         temp = new DriveDirectory(file.getName(), file.getId(), file.getModifiedTime(), true);
 
-        DriveDirectory.addSubFolder(parent, temp);
         parents.addLast(temp);
       }
       else
         temp = new DriveDirectory(file.getName(), file.getId(), file.getModifiedTime(), false);
-      
-      parent.children[i++] = temp;
+
+      parent.children.add(temp);
     }
 
     return addChildren(parents);

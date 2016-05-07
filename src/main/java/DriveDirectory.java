@@ -6,19 +6,18 @@ import java.io.IOException;
 
 import java.lang.InterruptedException;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class DriveDirectory {
-  public DriveDirectory[] children;
-  public LinkedList<DriveDirectory> subFolders;
+  public ArrayList<DriveDirectory> children;
   private String name;
   private String id;
   private long modifiedTime;
   private Boolean folder;
 
   public DriveDirectory(String nme, String identification, DateTime time, Boolean flag) {
-    children = null;
-    subFolders = null;
+    children = new ArrayList<DriveDirectory>();
     name = nme;
     id = identification;
     modifiedTime = time.getValue();
@@ -26,8 +25,7 @@ public class DriveDirectory {
   }
 
   public DriveDirectory(String nme, String identification, long time, Boolean flag) {
-    children = null;
-    subFolders = null;
+    children = new ArrayList<DriveDirectory>();
     name = nme;
     id = identification;
     modifiedTime = time;
@@ -44,23 +42,7 @@ public class DriveDirectory {
   public long getModTime() { return this.modifiedTime; }
 
   /** Children (files/folders) of folder @return Children of folder */
-  public DriveDirectory[] getChildren() { return this.children; }
-
-  /** Parent folders of file @return List of parent folder for file */
-  public LinkedList<DriveDirectory> getSubFolders() { return this.subFolders; }
-
-  /**
-  *  Creates a parent to child folder relationship.
-  *  
-  *  @param parent Parent folder in Drive
-  *  @param subFolder  Child folder contained in parent
-  */
-  public static void addSubFolder(DriveDirectory parent, DriveDirectory subFolder) {
-    if(parent.subFolders == null)
-      parent.subFolders = new LinkedList<DriveDirectory>();
-    
-    parent.subFolders.addLast(subFolder);
-  }
+  public ArrayList<DriveDirectory> getChildren() { return this.children; }
 
   /**
   *  Adds the given Drive file to the tree of previously indexed files/folders
@@ -75,6 +57,10 @@ public class DriveDirectory {
 
     DriveDirectory nw = new DriveDirectory(f.getName(), pID, modTime, folder);
 
-    addSubFolder(parent, nw);
+       // TODO: find better way
+    if(folder)
+       parent.children.add(0, nw);
+    else 
+      parent.children.add(nw);
   }
 }
