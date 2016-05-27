@@ -56,7 +56,9 @@ public class DriveSearch {
     if(k == parents.length && parent)
       return rt;
 
-    return null;
+    else {
+      return null;
+    }
   }
 
   /**

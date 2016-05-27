@@ -170,10 +170,12 @@ public class IOFile {
       adding.put(new IOFile(temp, fi.getOriginalFolder(), fi, drive.getID()), up.fileType(temp.toPath()));
     }
     if(temp.isDirectory()) {
-      File[] list = temp.listFiles();
+      if(temp.getName().charAt(0) != '.') {
+        File[] list = temp.listFiles();
 
-      for(File file : list)
-        fi.getSubFiles().addLast(file);
+        for(File file : list)
+          fi.getSubFiles().addLast(file);
+      }
     }
     
     return adding;
